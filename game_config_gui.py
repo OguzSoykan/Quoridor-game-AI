@@ -1,46 +1,57 @@
 import tkinter as tk
 from game_board import GameBoard
 
+def toggle_wall_mode(wall_mode_var, button):
+    wall_mode_var.set(not wall_mode_var.get())
+    button.config(text="Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
+
 def update_player_options(num_pawns_var, player_checkbuttons):
     num_pawns = int(num_pawns_var.get())
     for i in range(4):
         player_checkbuttons[i].config(state='normal' if i < num_pawns else 'disabled')
 
 def draw_board(canvas, game_board):
-    canvas.delete("all")  # Clear the canvas
-    for i in range(9):  # Draw the board
+    canvas.delete("all")
+    for i in range(9):
         for j in range(9):
             canvas.create_rectangle(i * 40, j * 40, (i + 1) * 40, (j + 1) * 40, outline="black", fill="white")
-    for x, y in game_board.pawns:  # Draw pawns
-        canvas.create_oval(x * 40 + 5, y * 40 + 5, x * 40 + 35, y * 40 + 35, fill="black")
-    for (wx, wy), orientation in game_board.walls:  # Draw walls
+    for x, y in game_board.pawns:
+        canvas.create_oval(x * 40 + 10, y * 40 + 10, x * 40 + 30, y * 40 + 30, fill="black")
+    for (wx, wy, orientation) in game_board.walls:
         if orientation == 'h':
-            canvas.create_line(wx * 40, wy * 40, wx * 40 + 80, wy * 40, fill="red", width=5)
+            canvas.create_line(wx * 40, wy * 40 + 40, wx * 40 + 80, wy * 40 + 40, fill="red", width=4)
         elif orientation == 'v':
-            canvas.create_line(wx * 40, wy * 40, wx * 40, wy * 40 + 80, fill="red", width=5)
+            canvas.create_line(wx * 40 + 40, wy * 40, wx * 40 + 40, wy * 40 + 80, fill="red", width=4)
 
-def on_board_click(event, canvas, game_board):
-    x, y = event.x // 40, event.y // 40  # Convert click position to board coordinates
-    print(f"Clicked on: {x}, {y}")
-    current_x, current_y = game_board.pawns[0]  # Assume you're moving the first pawn for simplicity
-
-    # Determine the move direction based on the click
-    move_direction = None
-    if x == current_x and y == current_y - 1:
-        move_direction = 'up'
-    elif x == current_x and y == current_y + 1:
-        move_direction = 'down'
-    elif y == current_y and x == current_x - 1:
-        move_direction = 'left'
-    elif y == current_y and x == current_x + 1:
-        move_direction = 'right'
-
-    # Perform the move if it's legal
-    if move_direction and game_board.is_move_legal(0, move_direction):  # Check if the move is legal
-        game_board.move_pawn(0, move_direction)  # Move the first pawn
-        draw_board(canvas, game_board)  # Redraw the board with new pawn positions
+def on_board_click(event, canvas, game_board, wall_mode):
+    x, y = event.x // 40, event.y // 40
+    if wall_mode.get():
+        orientation = 'h' if (y % 2 == 1) else 'v'  # Simplified assumption; adjust as needed
+        if game_board.place_wall((x, y), orientation):
+            draw_board(canvas, game_board)
+        else:
+            print("Cannot place wall here")
     else:
-        print("Illegal move")  # Debug message for illegal moves
+        # Attempt to move pawn
+        current_x, current_y = game_board.pawns[0]  # Assume you're moving the first pawn for simplicity
+
+        # Calculate direction based on clicked position relative to the current pawn position
+        move_direction = None
+        if x == current_x and y == current_y - 1:
+            move_direction = 'up'
+        elif x == current_x and y == current_y + 1:
+            move_direction = 'down'
+        elif y == current_y and x == current_x - 1:
+            move_direction = 'left'
+        elif y == current_y and x == current_x + 1:
+            move_direction = 'right'
+
+        # Perform the move if it's legal
+        if move_direction and game_board.is_move_legal(0, move_direction):  # Check if the move is legal
+            game_board.move_pawn(0, move_direction)  # Move the first pawn
+            draw_board(canvas, game_board)  # Redraw the board with new pawn positions
+        else:
+            print("Illegal move")  # Debug message for illegal moves
 
 def start_game(root, num_pawns_var, player_types_var):
     print("Game settings:")
@@ -61,6 +72,20 @@ def start_game(root, num_pawns_var, player_types_var):
     canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board: on_board_click(event, c, g))
 
 def setup_game(root):
+    frame_controls = tk.Frame(root)
+    frame_controls.pack(pady=10)
+
+    wall_mode_var = tk.BooleanVar(value=False)
+    wall_mode_button = tk.Button(frame_controls, text="Wall Mode: Off",
+                                 command=lambda: toggle_wall_mode(wall_mode_var, wall_mode_button))
+    wall_mode_button.pack()
+
+    game_window = tk.Toplevel(root)
+    game_board = GameBoard()
+    canvas = tk.Canvas(game_window, width=360, height=360)
+    canvas.pack()
+    draw_board(canvas, game_board)
+    canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board, wm=wall_mode_var: on_board_click(event, c, g, wm))
     frame_num_pawns = tk.Frame(root)
     frame_num_pawns.pack(pady=10)
 

@@ -45,19 +45,18 @@ class GameBoard:
         return False
 
     def place_wall(self, position, orientation):
-        # Example of simple wall placement
         if orientation not in ['h', 'v']:
             return False
         if orientation == 'h':
-            if position in self.walls or (position[0]+1, position[1]) in self.walls:
+            if position in self.walls or (position[0] + 1, position[1]) in self.walls:
                 return False
-            self.walls.add(position)
-            self.walls.add((position[0]+1, position[1]))
+            # Store position with orientation
+            self.walls.add((position[0], position[1], 'h'))
         elif orientation == 'v':
-            if position in self.walls or (position[0], position[1]+1) in self.walls:
+            if position in self.walls or (position[0], position[1] + 1) in self.walls:
                 return False
-            self.walls.add(position)
-            self.walls.add((position[0], position[1]+1))
+            # Store position with orientation
+            self.walls.add((position[0], position[1], 'v'))
         return True
 
     def can_jump_over(self, pawn_index, direction):
