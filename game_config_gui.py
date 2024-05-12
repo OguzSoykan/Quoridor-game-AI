@@ -23,35 +23,43 @@ def draw_board(canvas, game_board):
         elif orientation == 'v':
             canvas.create_line(wx * 40 + 40, wy * 40, wx * 40 + 40, wy * 40 + 80, fill="red", width=4)
 
+
 def on_board_click(event, canvas, game_board, wall_mode):
-    x, y = event.x // 40, event.y // 40
+    x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to board coordinates
     if wall_mode.get():
-        orientation = 'h' if (y % 2 == 1) else 'v'  # Simplified assumption; adjust as needed
+        orientation = 'h' if (y % 2 == 1) else 'v'  # Determine orientation based on row clicked (odd or even)
         if game_board.place_wall((x, y), orientation):
             draw_board(canvas, game_board)
         else:
             print("Cannot place wall here")
     else:
-        # Attempt to move pawn
-        current_x, current_y = game_board.pawns[0]  # Assume you're moving the first pawn for simplicity
+        # Find the closest pawn and move it if the move is legal
+        closest_pawn = None
+        min_distance = float('inf')
+        for index, (px, py) in enumerate(game_board.pawns):
+            distance = abs(px - x) + abs(py - y)
+            if distance < min_distance:
+                min_distance = distance
+                closest_pawn = index
 
-        # Calculate direction based on clicked position relative to the current pawn position
-        move_direction = None
-        if x == current_x and y == current_y - 1:
-            move_direction = 'up'
-        elif x == current_x and y == current_y + 1:
-            move_direction = 'down'
-        elif y == current_y and x == current_x - 1:
-            move_direction = 'left'
-        elif y == current_y and x == current_x + 1:
-            move_direction = 'right'
+        if closest_pawn is not None:
+            # Check if the move is in one of the legal directions
+            current_x, current_y = game_board.pawns[closest_pawn]
+            move_direction = None
+            if x == current_x and y == current_y - 1:
+                move_direction = 'up'
+            elif x == current_x and y == current_y + 1:
+                move_direction = 'down'
+            elif y == current_y and x == current_x - 1:
+                move_direction = 'left'
+            elif y == current_y and x == current_x + 1:
+                move_direction = 'right'
 
-        # Perform the move if it's legal
-        if move_direction and game_board.is_move_legal(0, move_direction):  # Check if the move is legal
-            game_board.move_pawn(0, move_direction)  # Move the first pawn
-            draw_board(canvas, game_board)  # Redraw the board with new pawn positions
-        else:
-            print("Illegal move")  # Debug message for illegal moves
+            if move_direction and game_board.is_move_legal(closest_pawn, move_direction):
+                game_board.move_pawn(closest_pawn, move_direction)
+                draw_board(canvas, game_board)
+            else:
+                print("Illegal move or no move selected")
 
 def start_game(root, num_pawns_var, player_types_var):
     print("Game settings:")
