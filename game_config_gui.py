@@ -14,52 +14,42 @@ def draw_board(canvas, game_board):
     canvas.delete("all")
     for i in range(9):
         for j in range(9):
-            canvas.create_rectangle(i * 40, j * 40, (i + 1) * 40, (j + 1) * 40, outline="black", fill="white")
-    for x, y in game_board.pawns:
-        canvas.create_oval(x * 40 + 10, y * 40 + 10, x * 40 + 30, y * 40 + 30, fill="black")
-    for (wx, wy, orientation) in game_board.walls:
-        if orientation == 'h':
-            canvas.create_line(wx * 40, wy * 40 + 40, wx * 40 + 80, wy * 40 + 40, fill="red", width=4)
-        elif orientation == 'v':
-            canvas.create_line(wx * 40 + 40, wy * 40, wx * 40 + 40, wy * 40 + 80, fill="red", width=4)
+            canvas.create_rectangle(i*40, j*40, (i+1)*40, (j+1)*40, outline="black", fill="white")
+    for idx, (x, y) in enumerate(game_board.pawns):
+        fill_color = "black" if idx == 0 else "red"  # Distinguish different players
+        canvas.create_oval(x*40+10, y*40+10, x*40+30, y*40+30, fill=fill_color)
 
 
-def on_board_click(event, canvas, game_board, wall_mode):
-    x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to board coordinates
+def on_board_click(event, canvas, game_board, wall_mode, current_player):
+    x, y = event.x // 40, event.y // 40  # Convert click position to board coordinates
     if wall_mode.get():
-        orientation = 'h' if (y % 2 == 1) else 'v'  # Determine orientation based on row clicked (odd or even)
+        orientation = 'h' if y % 2 == 1 else 'v'  # Simplify orientation logic; needs adjustment for actual gameplay
         if game_board.place_wall((x, y), orientation):
             draw_board(canvas, game_board)
+            current_player.set(1 - current_player.get())  # Toggle between 0 and 1 for two players
         else:
             print("Cannot place wall here")
     else:
-        # Find the closest pawn and move it if the move is legal
-        closest_pawn = None
-        min_distance = float('inf')
-        for index, (px, py) in enumerate(game_board.pawns):
-            distance = abs(px - x) + abs(py - y)
-            if distance < min_distance:
-                min_distance = distance
-                closest_pawn = index
+        pawn_index = current_player.get()  # Determine which pawn to move based on the current player
+        current_x, current_y = game_board.pawns[pawn_index]
+        move_direction = determine_direction(x, y, current_x, current_y)
+        if move_direction and game_board.is_move_legal(pawn_index, move_direction):
+            game_board.move_pawn(pawn_index, move_direction)
+            draw_board(canvas, game_board)
+            current_player.set(1 - current_player.get())  # Toggle to the next player's turn after a valid move
+        else:
+            print("Illegal move or not your turn")
 
-        if closest_pawn is not None:
-            # Check if the move is in one of the legal directions
-            current_x, current_y = game_board.pawns[closest_pawn]
-            move_direction = None
-            if x == current_x and y == current_y - 1:
-                move_direction = 'up'
-            elif x == current_x and y == current_y + 1:
-                move_direction = 'down'
-            elif y == current_y and x == current_x - 1:
-                move_direction = 'left'
-            elif y == current_y and x == current_x + 1:
-                move_direction = 'right'
-
-            if move_direction and game_board.is_move_legal(closest_pawn, move_direction):
-                game_board.move_pawn(closest_pawn, move_direction)
-                draw_board(canvas, game_board)
-            else:
-                print("Illegal move or no move selected")
+def determine_direction(x, y, current_x, current_y):
+    if x == current_x and y == current_y - 1:
+        return 'up'
+    elif x == current_x and y == current_y + 1:
+        return 'down'
+    elif y == current_y and x == current_x - 1:
+        return 'left'
+    elif y == current_y and x == current_x + 1:
+        return 'right'
+    return None
 
 def start_game(root, num_pawns_var, player_types_var):
     print("Game settings:")
@@ -83,6 +73,8 @@ def setup_game(root):
     frame_controls = tk.Frame(root)
     frame_controls.pack(pady=10)
 
+    current_player = tk.IntVar(value=0)  # 0 for player 1's turn, 1 for player 2's turn
+
     wall_mode_var = tk.BooleanVar(value=False)
     wall_mode_button = tk.Button(frame_controls, text="Wall Mode: Off",
                                  command=lambda: toggle_wall_mode(wall_mode_var, wall_mode_button))
@@ -93,7 +85,7 @@ def setup_game(root):
     canvas = tk.Canvas(game_window, width=360, height=360)
     canvas.pack()
     draw_board(canvas, game_board)
-    canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board, wm=wall_mode_var: on_board_click(event, c, g, wm))
+    canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board, wm=wall_mode_var, cp=current_player: on_board_click(event, c, g, wm, cp))
     frame_num_pawns = tk.Frame(root)
     frame_num_pawns.pack(pady=10)
 
