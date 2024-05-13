@@ -44,32 +44,42 @@ class GameBoard:
             return True
         return False
 
-    def place_wall(self, position, orientation):
-        if orientation not in ['h', 'v']:
-            return False
+    def can_place_wall(self, position, orientation):
+        x, y = position
         if orientation == 'h':
-            if position in self.walls or (position[0] + 1, position[1]) in self.walls:
-                return False
-            # Store position with orientation
-            self.walls.add((position[0], position[1], 'h'))
+            return (
+                x < 8 and
+                ((x, y, 'h') not in self.walls and (x + 1, y, 'h') not in self.walls) and
+                ((x, y, 'v') not in self.walls and (x + 1, y, 'v') not in self.walls)
+            )
         elif orientation == 'v':
-            if position in self.walls or (position[0], position[1] + 1) in self.walls:
-                return False
-            # Store position with orientation
-            self.walls.add((position[0], position[1], 'v'))
-        return True
+            return (
+                y < 8 and
+                ((x, y, 'v') not in self.walls and (x, y + 1, 'v') not in self.walls) and
+                ((x, y, 'h') not in self.walls and (x, y + 1, 'h') not in self.walls)
+            )
+        return False
+
+    def place_wall(self, position, orientation):
+        x, y = position
+        if self.can_place_wall(position, orientation):
+            if orientation == 'h':
+                self.walls.add((x, y, 'h'))
+                self.walls.add((x + 1, y, 'h'))
+            elif orientation == 'v':
+                self.walls.add((x, y, 'v'))
+                self.walls.add((x, y + 1, 'v'))
+            return True
+        return False
 
     def can_jump_over(self, pawn_index, direction):
         x, y = self.pawns[pawn_index]
         if direction == 'up' and y > 1:
-            # Check if the next cell has a pawn and if the next cell of next is empty or within bounds
             if (x, y - 1) in self.pawns and (x, y - 2) not in self.pawns:
                 return True
-        # Similar checks for 'down', 'left', 'right'
         return False
 
     def check_winner(self):
-        # Check if any pawn has reached the opposite side
         for index, (x, y) in enumerate(self.pawns):
             if (index == 0 and y == 8) or (index == 1 and y == 0):
                 return index + 1  # Return 1 or 2 to indicate the winner
