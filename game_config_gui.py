@@ -14,17 +14,23 @@ def update_player_options(num_pawns_var, player_checkbuttons):
 
 def draw_board(canvas, game_board):
     canvas.delete("all")
+    # Draw tiles
     for i in range(9):
         for j in range(9):
             canvas.create_rectangle(i*40, j*40, (i+1)*40, (j+1)*40, outline="black", fill="white")
+
+    # Draw pawns
     for idx, (x, y) in enumerate(game_board.pawns):
-        fill_color = "black" if idx == 0 else "red"  # Distinguish different players
+        fill_color = "black" if idx == 0 else "red"
         canvas.create_oval(x*40+10, y*40+10, x*40+30, y*40+30, fill=fill_color)
-    for (wx, wy, orientation) in game_board.walls:
-        if orientation == 'h':
-            canvas.create_line(wx*40, wy*40+20, (wx+1)*40+40, wy*40+20, fill="blue", width=4)
-        elif orientation == 'v':
-            canvas.create_line(wx*40+20, wy*40, wx*40+20, (wy+1)*40+40, fill="blue", width=4)
+
+        # Draw walls with player-specific colors
+        for (wx, wy, orientation, player_index) in game_board.walls:
+            color = "red" if player_index == 0 else "blue"
+            if orientation == 'h':
+                canvas.create_line(wx * 80 + 40, wy * 80 + 40, wx * 80 + 120, wy * 80 + 40, fill=color, width=4)
+            elif orientation == 'v':
+                canvas.create_line(wx * 80 + 40, wy * 80 + 40, wx * 80 + 40, wy * 80 + 120, fill=color, width=4)
 
 def determine_direction(x, y, current_x, current_y):
     if x == current_x and y == current_y - 1:
@@ -37,39 +43,45 @@ def determine_direction(x, y, current_x, current_y):
         return 'right'
     return None
 
+
 def on_board_click(event, canvas, game_board, wall_mode, current_player):
-    x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to grid indices
-    grid_x, grid_y = x // 2, y // 2  # Adjust to grid coordinates for wall placement
+    x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to board grid indices
+    grid_x, grid_y = (x - 1) // 2, (y - 1) // 2  # Correct grid indices for wall placement
 
     if wall_mode.get():
-        # Determine orientation based on mouse click: Vertical if odd x; horizontal if odd y
-        if x % 2 == 1:  # Assumes vertical wall when clicking on the odd indexed x
+        # Determine orientation and adjust grid coordinates for walls
+        if x % 2 == 1 and y % 2 == 0:  # Vertical wall
             orientation = 'v'
-        elif y % 2 == 1:  # Assumes horizontal wall when clicking on the odd indexed y
+        elif x % 2 == 0 and y % 2 == 1:  # Horizontal wall
             orientation = 'h'
         else:
             print("Invalid position for wall placement.")
-            return  # Exit the function if neither condition is true
+            return
 
         if game_board.can_place_wall((grid_x, grid_y), orientation):
-            if game_board.place_wall((grid_x, grid_y), orientation):
+            if game_board.place_wall((grid_x, grid_y), orientation, current_player.get()):
                 draw_board(canvas, game_board)
+                current_player.set(1 - current_player.get())  # Switch turns
             else:
-                print(f"{orientation.upper()} wall cannot be placed here.")
+                print("Cannot place wall here.")
         else:
-            print(f"Cannot place a {orientation.upper()} wall at ({grid_x}, {grid_y}).")
+            print("Invalid wall position.")
     else:
-        pawn_index = current_player.get()  # Determine which pawn to move based on the current player
+        # Pawn movement handling
+        pawn_index = current_player.get()  # Current player index for pawn
         current_x, current_y = game_board.pawns[pawn_index]
-        move_direction = determine_direction(x, y, current_x, current_y)
-        if move_direction and game_board.is_move_legal(pawn_index, move_direction):
-            if game_board.move_pawn(pawn_index, move_direction):
+        direction = determine_direction(x, y, current_x, current_y)
+
+        # Move the pawn if the direction is valid and the move is legal
+        if direction and game_board.is_move_legal(pawn_index, direction):
+            if game_board.move_pawn(pawn_index, direction):
                 draw_board(canvas, game_board)
-                current_player.set(1 - current_player.get())  # Toggle to the next player's turn after a valid move
+                current_player.set(1 - current_player.get())  # Switch turns after move
             else:
                 print("Move could not be performed.")
         else:
-            print("Illegal move or not your turn")
+            print("Illegal move or not your turn.")
+
 
 def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_player):
     print("Game settings:")

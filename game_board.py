@@ -47,28 +47,17 @@ class GameBoard:
     def can_place_wall(self, position, orientation):
         x, y = position
         if orientation == 'h':
-            return (
-                x < 8 and
-                ((x, y, 'h') not in self.walls and (x + 1, y, 'h') not in self.walls) and
-                ((x, y, 'v') not in self.walls and (x + 1, y, 'v') not in self.walls)
-            )
+            if y == 0 or y >= 8 or (x, y - 1, 'h') in self.walls or (x, y, 'h') in self.walls:
+                return False
         elif orientation == 'v':
-            return (
-                y < 8 and
-                ((x, y, 'v') not in self.walls and (x, y + 1, 'v') not in self.walls) and
-                ((x, y, 'h') not in self.walls and (x, y + 1, 'h') not in self.walls)
-            )
-        return False
+            if x == 0 or x >= 8 or (x - 1, y, 'v') in self.walls or (x, y, 'v') in self.walls:
+                return False
+        return True
 
-    def place_wall(self, position, orientation):
+    def place_wall(self, position, orientation, player_index):
         x, y = position
         if self.can_place_wall(position, orientation):
-            if orientation == 'h':
-                self.walls.add((x, y, 'h'))
-                self.walls.add((x + 1, y, 'h'))
-            elif orientation == 'v':
-                self.walls.add((x, y, 'v'))
-                self.walls.add((x, y + 1, 'v'))
+            self.walls.add((x, y, orientation, player_index))  # Store player index with wall
             return True
         return False
 
