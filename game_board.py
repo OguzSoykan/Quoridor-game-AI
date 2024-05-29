@@ -6,6 +6,8 @@ class GameBoard:
 
     def is_move_legal(self, pawn_index, direction):
         x, y = self.pawns[pawn_index]
+        # print(f"Checking legality of move {direction} for pawn at ({x}, {y})")  # Commented out
+       
         if direction == 'up':
             new_position = (x, y-1)
         elif direction == 'down':
@@ -17,12 +19,12 @@ class GameBoard:
         else:
             return False
 
-        # Check boundaries
         if not (0 <= new_position[0] < 9 and 0 <= new_position[1] < 9):
+            # print("Move out of bounds")  # Commented out
             return False
 
-        # Check walls and other pawns
         if new_position in self.walls or new_position in self.pawns:
+            # print("Move blocked by wall or pawn")  # Commented out
             return False
 
         if self.can_jump_over(pawn_index, direction):
@@ -70,6 +72,8 @@ class GameBoard:
 
     def check_winner(self):
         for index, (x, y) in enumerate(self.pawns):
-            if (index == 0 and y == 8) or (index == 1 and y == 0):
-                return index + 1  # Return 1 or 2 to indicate the winner
+            if index == 0 and y == 8:
+                return 1  # Player 1 wins
+            elif index == 1 and y == 0:
+                return 2  # Player 2 wins
         return None

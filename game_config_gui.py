@@ -1,11 +1,11 @@
 import tkinter as tk
+from tkinter import messagebox
 from game_board import GameBoard
 
 def toggle_wall_mode(wall_mode_var, button=None):
     wall_mode_var.set(not wall_mode_var.get())
     if button:
         button.config(text="Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
-    print("Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
 
 def update_player_options(num_pawns_var, player_checkbuttons):
     num_pawns = int(num_pawns_var.get())
@@ -57,9 +57,8 @@ def determine_direction(x, y, current_x, current_y):
         return 'right'
     return None
 
-def on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn):
+def on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window):
     x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to board grid indices
-    grid_x, grid_y = (x - 1) // 2, (y - 1) // 2  # Correct grid indices for wall placement
 
     if wall_mode.get():
         # Determine orientation and adjust grid coordinates for walls
@@ -68,40 +67,61 @@ def on_board_click(event, canvas, game_board, wall_mode, current_player, selecte
         elif x % 2 == 0 and y % 2 == 1:  # Horizontal wall
             orientation = 'h'
         else:
-            print("Invalid position for wall placement.")
+            messagebox.showerror("Invalid Move", "Invalid position for wall placement.")
             return
 
-        if game_board.can_place_wall((grid_x, grid_y), orientation):
-            if game_board.place_wall((grid_x, grid_y), orientation, current_player.get()):
+        if game_board.can_place_wall((x // 2, y // 2), orientation):
+            if game_board.place_wall((x // 2, y // 2), orientation, current_player.get()):
                 draw_board(canvas, game_board)
                 current_player.set(1 - current_player.get())  # Switch turns
+                selected_pawn[0] = None
             else:
-                print("Cannot place wall here.")
+                messagebox.showerror("Invalid Move", "Cannot place wall here.")
         else:
-            print("Invalid wall position.")
+            messagebox.showerror("Invalid Move", "Invalid wall position.")
     else:
         # Pawn movement handling
         if selected_pawn[0] is None:
             for idx, (px, py) in enumerate(game_board.pawns):
                 if px == x and py == y:
+                    if idx != current_player.get():
+                        messagebox.showerror("Invalid Move", "It's not your turn!")
+                        return
                     selected_pawn[0] = idx
-                    break
+                    draw_board(canvas, game_board, selected_pawn[0])  # Highlight potential moves
+                    return
 
         if selected_pawn[0] is not None:
             pawn_index = selected_pawn[0]
+            if pawn_index != current_player.get():
+                messagebox.showerror("Invalid Move", "It's not your turn!")
+                selected_pawn[0] = None
+                return
+
             current_x, current_y = game_board.pawns[pawn_index]
+            if (x, y) == (current_x, current_y):
+                messagebox.showerror("Invalid Move", "You must move to a different position.")
+                selected_pawn[0] = None
+                return
+
             direction = determine_direction(x, y, current_x, current_y)
 
-            # Move the pawn if the direction is valid and the move is legal
             if direction and game_board.is_move_legal(pawn_index, direction):
                 if game_board.move_pawn(pawn_index, direction):
                     draw_board(canvas, game_board)
+                    winner = game_board.check_winner()
+                    if winner:
+                        messagebox.showinfo("Game Over", f"Player {winner} wins!")
+                        game_window.quit()
+                        game_window.destroy()
+                        return
                     current_player.set(1 - current_player.get())  # Switch turns after move
                     selected_pawn[0] = None  # Deselect pawn
                 else:
-                    print("Move could not be performed.")
+                    messagebox.showerror("Invalid Move", "Move could not be performed.")
             else:
-                print("Illegal move or not your turn.")
+                messagebox.showerror("Invalid Move", "Illegal move or not your turn.")
+                selected_pawn[0] = None  # Reset the selected pawn if the move is invalid
         draw_board(canvas, game_board, selected_pawn[0])
 
 def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_player):
@@ -133,7 +153,7 @@ def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_pla
     game_window.bind("<Key-w>", lambda event: toggle_wall_mode(wall_mode_var))
 
     # Ensure canvas updates are linked to current settings and players
-    canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board, wm=wall_mode_var, cp=current_player, sp=selected_pawn: on_board_click(event, c, g, wm, cp, sp))
+    canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board, wm=wall_mode_var, cp=current_player, sp=selected_pawn: on_board_click(event, c, g, wm, cp, sp, game_window))
     
     # Update player turn label after every click
     game_window.bind("<Button-1>", lambda event: update_player_turn_label())
@@ -145,6 +165,7 @@ def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_pla
         root.destroy()  # Destroy the root window
 
     game_window.protocol("WM_DELETE_WINDOW", on_close)
+
 
 def setup_game(root):
     frame_controls = tk.Frame(root)
