@@ -1,5 +1,3 @@
-# game_config_gui.py
-
 import tkinter as tk
 from tkinter import messagebox
 from game_board import GameBoard
@@ -14,10 +12,11 @@ def update_player_options(num_pawns_var, player_checkbuttons):
     for i in range(4):
         player_checkbuttons[i].config(state='normal' if i < num_pawns else 'disabled')
 
-
+# game_config_gui.py
 
 def draw_board(canvas, game_board, selected_pawn=None):
     canvas.delete("all")
+
     # Draw tiles
     for i in range(9):
         for j in range(9):
@@ -31,13 +30,16 @@ def draw_board(canvas, game_board, selected_pawn=None):
             print(f"Checking potential move {direction} for pawn {selected_pawn} at ({x}, {y})")
             if game_board.is_move_legal(selected_pawn, direction):
                 if direction == 'up':
+                    print(f"Drawing up move for pawn {selected_pawn} at ({x}, {y - 1})")
                     canvas.create_rectangle(x * 40 + 10, (y - 1) * 40 + 10, x * 40 + 30, y * 40 - 10, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'down':
+                    print(f"Drawing down move for pawn {selected_pawn} at ({x}, {y + 1})")
                     canvas.create_rectangle(x * 40 + 10, (y + 1) * 40 + 10, x * 40 + 30, (y + 1) * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'left':
                     print(f"Drawing left move for pawn {selected_pawn} at ({x - 1}, {y})")
                     canvas.create_rectangle((x - 1) * 40 + 10, y * 40 + 10, x * 40 - 10, y * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'right':
+                    print(f"Drawing right move for pawn {selected_pawn} at ({x + 1}, {y})")
                     canvas.create_rectangle((x + 1) * 40 + 10, y * 40 + 10, (x + 1) * 40 + 30, y * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
 
     # Draw pawns (draw after potential moves to avoid overlaps)
@@ -60,6 +62,9 @@ def draw_board(canvas, game_board, selected_pawn=None):
             canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill="green", width=4, dash=(2, 2))
         elif orientation == 'v':
             canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="green", width=4, dash=(2, 2))
+
+    print("Finished drawing the board and potential moves.")
+
 
 
 
@@ -207,3 +212,5 @@ def setup_game(root):
                              command=lambda: start_game(root, num_pawns_var, player_types_var, wall_mode_var,
                                                         current_player))
     start_button.pack(pady=20)
+
+
