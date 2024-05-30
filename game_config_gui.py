@@ -37,16 +37,17 @@ def draw_board(canvas, game_board, selected_pawn=None):
     # Highlight potential moves for the selected pawn
     if selected_pawn is not None:
         x, y = game_board.pawns[selected_pawn]
+        player_color = "blue" if selected_pawn == 0 else "yellow"
         for direction in ['up', 'down', 'left', 'right']:
             if game_board.is_move_legal(selected_pawn, direction):
                 if direction == 'up':
-                    canvas.create_rectangle(x * 40 + 10, (y - 1) * 40 + 10, x * 40 + 30, y * 40 - 10, outline="blue", fill="blue")
+                    canvas.create_rectangle(x * 40 + 10, (y - 1) * 40 + 10, x * 40 + 30, y * 40 - 10, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'down':
-                    canvas.create_rectangle(x * 40 + 10, (y + 1) * 40 + 10, x * 40 + 30, (y + 1) * 40 + 30, outline="blue", fill="blue")
+                    canvas.create_rectangle(x * 40 + 10, (y + 1) * 40 + 10, x * 40 + 30, (y + 1) * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'left':
-                    canvas.create_rectangle((x - 1) * 40 + 10, y * 40 + 10, x * 40 - 10, y * 40 + 30, outline="blue", fill="blue")
+                    canvas.create_rectangle((x - 1) * 40 + 10, y * 40 + 10, x * 40 - 10, y * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'right':
-                    canvas.create_rectangle((x + 1) * 40 + 10, y * 40 + 10, (x + 1) * 40 + 30, y * 40 + 30, outline="blue", fill="blue")
+                    canvas.create_rectangle((x + 1) * 40 + 10, y * 40 + 10, (x + 1) * 40 + 30, y * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
 
     # Draw walls
     for (wx, wy, orientation, player_index) in game_board.walls:
@@ -59,7 +60,6 @@ def draw_board(canvas, game_board, selected_pawn=None):
     # Draw temporary wall
     if game_board.temp_wall:
         wx, wy, orientation = game_board.temp_wall
-        print(f"Drawing temporary wall at ({wx}, {wy}) with orientation {orientation}")  # Debugging print
         if orientation == 'h':
             canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill="green", width=4, dash=(2, 2))
         elif orientation == 'v':

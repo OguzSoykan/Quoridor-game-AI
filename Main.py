@@ -29,7 +29,7 @@ def main():
         if game_board.temp_wall:
             if game_board.confirm_wall(current_player.get()):
                 draw_board(canvas, game_board)
-                current_player.set(1 - current_player.get())  # Switch turns
+                switch_turn()
                 selected_pawn[0] = None
                 wall_mode.set(False)  # Exit wall mode after confirming wall
                 print(f"Wall confirmed at {game_board.temp_wall[:2]} by player {current_player.get()}")
@@ -55,8 +55,20 @@ def main():
 
     def on_canvas_click(event):
         on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window)
+        update_player_turn_label()
 
     canvas.bind("<Button-1>", on_canvas_click)
+
+    # Label to show current player
+    player_turn_label = tk.Label(game_window, text="Player 1's Turn", font=("Arial", 16))
+    player_turn_label.pack()
+
+    def update_player_turn_label():
+        player_turn_label.config(text=f"Player {current_player.get() + 1}'s Turn")
+
+    def switch_turn():
+        current_player.set(1 - current_player.get())
+        update_player_turn_label()
 
     draw_board(canvas, game_board)
     game_window.mainloop()
