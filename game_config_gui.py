@@ -51,7 +51,7 @@ def draw_board(canvas, game_board, selected_pawn=None):
 
     # Draw walls
     for (wx, wy, orientation, player_index) in game_board.walls:
-        color = "red" if player_index == 0 else "blue"
+        color = "blue" if player_index == 0 else "red"
         if orientation == 'h':
             canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill=color, width=4)
         elif orientation == 'v':
@@ -64,7 +64,6 @@ def draw_board(canvas, game_board, selected_pawn=None):
             canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill="green", width=4, dash=(2, 2))
         elif orientation == 'v':
             canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="green", width=4, dash=(2, 2))
-
 
 
 
