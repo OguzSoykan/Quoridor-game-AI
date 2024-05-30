@@ -3,77 +3,69 @@ class GameBoard:
         self.board = [[None for _ in range(9)] for _ in range(9)]
         self.pawns = [(4, 0), (4, 8)]  # Starting positions for 2-player game
         self.walls = set()
+        self.temp_wall = None  # Temporary wall position and orientation (x, y, orientation)
+
+    def toggle_temp_wall(self, x, y):
+        if self.temp_wall and self.temp_wall[:2] == (x, y):
+            new_orientation = 'v' if self.temp_wall[2] == 'h' else 'h'
+            self.temp_wall = (x, y, new_orientation)
+            print(f"Toggled to {new_orientation} wall at ({x}, {y})")
+        else:
+            self.temp_wall = (x, y, 'h')
+            print(f"Placed horizontal temporary wall at ({x}, {y})")
+
+    def confirm_wall(self, player_index):
+        if not self.temp_wall:
+            return False
+        
+        x, y, orientation = self.temp_wall
+        if self.is_wall_placement_valid(x, y, orientation):
+            self.walls.add((x, y, orientation, player_index))
+            self.temp_wall = None
+            return True
+        return False
+
+    def is_wall_placement_valid(self, x, y, orientation):
+        # Example: Ensure walls don't overlap and don't block all paths
+        for wx, wy, worientation, _ in self.walls:
+            if (x, y) == (wx, wy) and orientation == worientation:
+                return False
+        return True
 
     def is_move_legal(self, pawn_index, direction):
+        # Simplified example logic for move legality
         x, y = self.pawns[pawn_index]
-        # print(f"Checking legality of move {direction} for pawn at ({x}, {y})")  # Commented out
-       
-        if direction == 'up':
-            new_position = (x, y-1)
-        elif direction == 'down':
-            new_position = (x, y+1)
-        elif direction == 'left':
-            new_position = (x-1, y)
-        elif direction == 'right':
-            new_position = (x+1, y)
-        else:
-            return False
-
-        if not (0 <= new_position[0] < 9 and 0 <= new_position[1] < 9):
-            # print("Move out of bounds")  # Commented out
-            return False
-
-        if new_position in self.walls or new_position in self.pawns:
-            # print("Move blocked by wall or pawn")  # Commented out
-            return False
-
-        if self.can_jump_over(pawn_index, direction):
+        if direction == 'up' and y > 0:
             return True
-
-        return True
+        if direction == 'down' and y < 8:
+            return True
+        if direction == 'left' and x > 0:
+            return True
+        if direction == 'right' and x < 8:
+            return True
+        return False
 
     def move_pawn(self, pawn_index, direction):
-        if self.is_move_legal(pawn_index, direction):
-            x, y = self.pawns[pawn_index]
-            if direction == 'up':
-                self.pawns[pawn_index] = (x, y-1)
-            elif direction == 'down':
-                self.pawns[pawn_index] = (x, y+1)
-            elif direction == 'left':
-                self.pawns[pawn_index] = (x-1, y)
-            elif direction == 'right':
-                self.pawns[pawn_index] = (x+1, y)
-            return True
-        return False
-
-    def can_place_wall(self, position, orientation):
-        x, y = position
-        if orientation == 'h':
-            if y == 0 or y >= 8 or (x, y - 1, 'h') in self.walls or (x, y, 'h') in self.walls:
-                return False
-        elif orientation == 'v':
-            if x == 0 or x >= 8 or (x - 1, y, 'v') in self.walls or (x, y, 'v') in self.walls:
-                return False
-        return True
-
-    def place_wall(self, position, orientation, player_index):
-        x, y = position
-        if self.can_place_wall(position, orientation):
-            self.walls.add((x, y, orientation, player_index))  # Store player index with wall
-            return True
-        return False
-
-    def can_jump_over(self, pawn_index, direction):
+        # Example logic for moving the pawn
         x, y = self.pawns[pawn_index]
-        if direction == 'up' and y > 1:
-            if (x, y - 1) in self.pawns and (x, y - 2) not in self.pawns:
-                return True
+        if direction == 'up' and y > 0:
+            self.pawns[pawn_index] = (x, y - 1)
+            return True
+        if direction == 'down' and y < 8:
+            self.pawns[pawn_index] = (x, y + 1)
+            return True
+        if direction == 'left' and x > 0:
+            self.pawns[pawn_index] = (x - 1, y)
+            return True
+        if direction == 'right' and x < 8:
+            self.pawns[pawn_index] = (x + 1, y)
+            return True
         return False
 
     def check_winner(self):
-        for index, (x, y) in enumerate(self.pawns):
-            if index == 0 and y == 8:
-                return 1  # Player 1 wins
-            elif index == 1 and y == 0:
-                return 2  # Player 2 wins
+        for idx, (x, y) in enumerate(self.pawns):
+            if idx == 0 and y == 8:
+                return 0
+            if idx == 1 and y == 0:
+                return 1
         return None

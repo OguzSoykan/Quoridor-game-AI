@@ -1,11 +1,65 @@
 import tkinter as tk
-from game_config_gui import setup_game
+from tkinter import messagebox
+
+from game_board import GameBoard
+from game_config_gui import draw_board, on_board_click
 
 def main():
-    root = tk.Tk()
-    root.title("Quoridor Game")
-    setup_game(root)
-    root.mainloop()
+    game_window = tk.Tk()
+    game_window.title("Quoridor Game")
+
+    canvas = tk.Canvas(game_window, width=400, height=400)
+    canvas.pack()
+
+    game_board = GameBoard()
+    wall_mode = tk.BooleanVar()
+    wall_mode.set(False)
+    current_player = tk.IntVar()
+    current_player.set(0)
+    selected_pawn = [None]
+
+    def toggle_wall_mode():
+        wall_mode.set(not wall_mode.get())
+        print(f"Wall mode set to {wall_mode.get()}")
+
+    wall_button = tk.Button(game_window, text="Toggle Wall Mode", command=toggle_wall_mode)
+    wall_button.pack()
+
+    def confirm_wall_placement():
+        if game_board.temp_wall:
+            if game_board.confirm_wall(current_player.get()):
+                draw_board(canvas, game_board)
+                current_player.set(1 - current_player.get())  # Switch turns
+                selected_pawn[0] = None
+                wall_mode.set(False)  # Exit wall mode after confirming wall
+                print(f"Wall confirmed at {game_board.temp_wall[:2]} by player {current_player.get()}")
+            else:
+                messagebox.showerror("Invalid Move", "Cannot place wall here.")
+                print("Invalid wall placement attempt")
+        else:
+            messagebox.showinfo("No Wall", "No temporary wall to confirm.")
+
+    confirm_button = tk.Button(game_window, text="Confirm Wall Placement", command=confirm_wall_placement)
+    confirm_button.pack()
+
+    def cancel_wall_placement():
+        if game_board.temp_wall:
+            game_board.temp_wall = None
+            draw_board(canvas, game_board)
+            print("Wall placement canceled")
+        wall_mode.set(False)  # Exit wall mode
+        print("Exited wall mode")
+
+    cancel_button = tk.Button(game_window, text="Cancel Wall Placement", command=cancel_wall_placement)
+    cancel_button.pack()
+
+    def on_canvas_click(event):
+        on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window)
+
+    canvas.bind("<Button-1>", on_canvas_click)
+
+    draw_board(canvas, game_board)
+    game_window.mainloop()
 
 if __name__ == "__main__":
     main()

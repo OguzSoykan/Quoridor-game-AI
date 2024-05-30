@@ -6,6 +6,8 @@ def toggle_wall_mode(wall_mode_var, button=None):
     wall_mode_var.set(not wall_mode_var.get())
     if button:
         button.config(text="Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
+    # Commented out print statement
+    # print("Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
 
 def update_player_options(num_pawns_var, player_checkbuttons):
     num_pawns = int(num_pawns_var.get())
@@ -18,6 +20,14 @@ def draw_board(canvas, game_board, selected_pawn=None):
     for i in range(9):
         for j in range(9):
             canvas.create_rectangle(i * 40, j * 40, (i + 1) * 40, (j + 1) * 40, outline="black", fill="white")
+
+    # Draw potential wall positions
+    for i in range(9):
+        for j in range(10):
+            canvas.create_rectangle(i * 40 + 35, j * 40 - 5, i * 40 + 45, j * 40 + 5, outline="gray", fill="gray")
+    for i in range(10):
+        for j in range(9):
+            canvas.create_rectangle(i * 40 - 5, j * 40 + 35, i * 40 + 5, j * 40 + 45, outline="gray", fill="gray")
 
     # Draw pawns
     for idx, (x, y) in enumerate(game_board.pawns):
@@ -42,11 +52,38 @@ def draw_board(canvas, game_board, selected_pawn=None):
     for (wx, wy, orientation, player_index) in game_board.walls:
         color = "red" if player_index == 0 else "blue"
         if orientation == 'h':
-            canvas.create_line(wx * 80 + 40, wy * 80 + 40, wx * 80 + 120, wy * 80 + 40, fill=color, width=4)
+            canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill=color, width=4)
         elif orientation == 'v':
-            canvas.create_line(wx * 80 + 40, wy * 80 + 40, wx * 80 + 40, wy * 80 + 120, fill=color, width=4)
+            canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill=color, width=4)
+
+    # Draw temporary wall
+    if game_board.temp_wall:
+        wx, wy, orientation = game_board.temp_wall
+        print(f"Drawing temporary wall at ({wx}, {wy}) with orientation {orientation}")  # Debugging print
+        if orientation == 'h':
+            canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill="green", width=4, dash=(2, 2))
+        elif orientation == 'v':
+            canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="green", width=4, dash=(2, 2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def determine_direction(x, y, current_x, current_y):
+    # Commented out print statement
+    # print(f"Determining direction: current ({current_x}, {current_y}), target ({x}, {y})")
     if x == current_x and y == current_y - 1:
         return 'up'
     elif x == current_x and y == current_y + 1:
@@ -58,27 +95,13 @@ def determine_direction(x, y, current_x, current_y):
     return None
 
 def on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window):
-    x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to board grid indices
+    x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to grid indices
+    print(f"Board click at ({x}, {y})")
 
     if wall_mode.get():
-        # Determine orientation and adjust grid coordinates for walls
-        if x % 2 == 1 and y % 2 == 0:  # Vertical wall
-            orientation = 'v'
-        elif x % 2 == 0 and y % 2 == 1:  # Horizontal wall
-            orientation = 'h'
-        else:
-            messagebox.showerror("Invalid Move", "Invalid position for wall placement.")
-            return
-
-        if game_board.can_place_wall((x // 2, y // 2), orientation):
-            if game_board.place_wall((x // 2, y // 2), orientation, current_player.get()):
-                draw_board(canvas, game_board)
-                current_player.set(1 - current_player.get())  # Switch turns
-                selected_pawn[0] = None
-            else:
-                messagebox.showerror("Invalid Move", "Cannot place wall here.")
-        else:
-            messagebox.showerror("Invalid Move", "Invalid wall position.")
+        game_board.toggle_temp_wall(x, y)
+        draw_board(canvas, game_board)
+        print(f"Toggled wall at ({x}, {y})")
     else:
         # Pawn movement handling
         if selected_pawn[0] is None:
@@ -124,11 +147,30 @@ def on_board_click(event, canvas, game_board, wall_mode, current_player, selecte
                 selected_pawn[0] = None  # Reset the selected pawn if the move is invalid
         draw_board(canvas, game_board, selected_pawn[0])
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_player):
-    print("Game settings:")
-    print(f"Number of pawns: {num_pawns_var.get()}")
+    # Commented out print statements
+    # print("Game settings:")
+    # print(f"Number of pawns: {num_pawns_var.get()}")
     for i in range(int(num_pawns_var.get())):
-        print(f"Player {i + 1}: {'Bot' if player_types_var[i].get() == 1 else 'Human'}")
+        # print(f"Player {i + 1}: {'Bot' if player_types_var[i].get() == 1 else 'Human'}")
+        pass
 
     root.withdraw()  # Hide the initial setup window
 
@@ -149,8 +191,9 @@ def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_pla
 
     draw_board(canvas, game_board)  # Initial drawing of the board
 
-    # Bind the "W" key to toggle wall mode
-    game_window.bind("<Key-w>", lambda event: toggle_wall_mode(wall_mode_var))
+    # Add a button to toggle wall mode
+    wall_mode_button = tk.Button(game_window, text="Wall Mode: Off", command=lambda: toggle_wall_mode(wall_mode_var, wall_mode_button))
+    wall_mode_button.pack()
 
     # Ensure canvas updates are linked to current settings and players
     canvas.bind("<Button-1>", lambda event, c=canvas, g=game_board, wm=wall_mode_var, cp=current_player, sp=selected_pawn: on_board_click(event, c, g, wm, cp, sp, game_window))
@@ -165,7 +208,6 @@ def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_pla
         root.destroy()  # Destroy the root window
 
     game_window.protocol("WM_DELETE_WINDOW", on_close)
-
 
 def setup_game(root):
     frame_controls = tk.Frame(root)
