@@ -1,3 +1,5 @@
+# game_config_gui.py
+
 import tkinter as tk
 from tkinter import messagebox
 from game_board import GameBoard
@@ -12,6 +14,8 @@ def update_player_options(num_pawns_var, player_checkbuttons):
     for i in range(4):
         player_checkbuttons[i].config(state='normal' if i < num_pawns else 'disabled')
 
+
+
 def draw_board(canvas, game_board, selected_pawn=None):
     canvas.delete("all")
     # Draw tiles
@@ -19,35 +23,29 @@ def draw_board(canvas, game_board, selected_pawn=None):
         for j in range(9):
             canvas.create_rectangle(i * 40, j * 40, (i + 1) * 40, (j + 1) * 40, outline="black", fill="white")
 
-    # Draw potential wall positions
-    for i in range(9):
-        for j in range(10):
-            canvas.create_rectangle(i * 40 + 35, j * 40 - 5, i * 40 + 45, j * 40 + 5, outline="gray", fill="gray")
-    for i in range(10):
-        for j in range(9):
-            canvas.create_rectangle(i * 40 - 5, j * 40 + 35, i * 40 + 5, j * 40 + 45, outline="gray", fill="gray")
-
-    # Draw pawns
-    for idx, (x, y) in enumerate(game_board.pawns):
-        fill_color = "black" if idx == 0 else "red"
-        canvas.create_oval(x * 40 + 10, y * 40 + 10, x * 40 + 30, y * 40 + 30, fill=fill_color)
-
     # Highlight potential moves for the selected pawn
     if selected_pawn is not None:
         x, y = game_board.pawns[selected_pawn]
         player_color = "blue" if selected_pawn == 0 else "yellow"
         for direction in ['up', 'down', 'left', 'right']:
+            print(f"Checking potential move {direction} for pawn {selected_pawn} at ({x}, {y})")
             if game_board.is_move_legal(selected_pawn, direction):
                 if direction == 'up':
                     canvas.create_rectangle(x * 40 + 10, (y - 1) * 40 + 10, x * 40 + 30, y * 40 - 10, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'down':
                     canvas.create_rectangle(x * 40 + 10, (y + 1) * 40 + 10, x * 40 + 30, (y + 1) * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'left':
+                    print(f"Drawing left move for pawn {selected_pawn} at ({x - 1}, {y})")
                     canvas.create_rectangle((x - 1) * 40 + 10, y * 40 + 10, x * 40 - 10, y * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
                 elif direction == 'right':
                     canvas.create_rectangle((x + 1) * 40 + 10, y * 40 + 10, (x + 1) * 40 + 30, y * 40 + 30, outline=player_color, fill=player_color, stipple="gray50")
 
-    # Draw walls
+    # Draw pawns (draw after potential moves to avoid overlaps)
+    for idx, (x, y) in enumerate(game_board.pawns):
+        fill_color = "black" if idx == 0 else "red"
+        canvas.create_oval(x * 40 + 10, y * 40 + 10, x * 40 + 30, y * 40 + 30, fill=fill_color)
+
+    # Draw walls (draw after pawns to avoid overlaps)
     for (wx, wy, orientation, player_index) in game_board.walls:
         color = "blue" if player_index == 0 else "red"
         if orientation == 'h':
@@ -63,16 +61,16 @@ def draw_board(canvas, game_board, selected_pawn=None):
         elif orientation == 'v':
             canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="green", width=4, dash=(2, 2))
 
+
+
 def determine_direction(x, y, current_x, current_y):
-    # Commented out print statement
-    # print(f"Determining direction: current ({current_x}, {current_y}), target ({x}, {y})")
     if x == current_x and y == current_y - 1:
         return 'up'
     elif x == current_x and y == current_y + 1:
         return 'down'
-    elif y == current_y and x == current_x - 1:
+    elif x == current_x - 1 and y == current_y:
         return 'left'
-    elif y == current_y and x == current_x + 1:
+    elif x == current_x + 1 and y == current_y:
         return 'right'
     return None
 
@@ -113,8 +111,8 @@ def on_board_click(event, canvas, game_board, wall_mode, current_player, selecte
                 if game_board.move_pawn(pawn_index, direction):
                     draw_board(canvas, game_board)
                     winner = game_board.check_winner()
-                    if winner:
-                        messagebox.showinfo("Game Over", f"Player {winner} wins!")
+                    if winner is not None:
+                        messagebox.showinfo("Game Over", f"Player {winner + 1} wins!")
                         game_window.quit()
                         game_window.destroy()
                         return
@@ -127,9 +125,7 @@ def on_board_click(event, canvas, game_board, wall_mode, current_player, selecte
                 selected_pawn[0] = None  # Reset the selected pawn if the move is invalid
         draw_board(canvas, game_board, selected_pawn[0])
 
-
 def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_player):
-
     for i in range(int(num_pawns_var.get())):
         pass
 
