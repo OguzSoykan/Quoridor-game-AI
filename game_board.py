@@ -91,45 +91,36 @@ class GameBoard:
 
         if direction == 'up':
             if y > 0:
-                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x, y - 1):
-                    print(f"Move up is legal for pawn {pawn_index} at ({x}, {y})")
+                if self.is_position_occupied(x, y - 1):
+                    if y > 1 and not self.is_position_occupied(x, y - 2) and not self.is_wall_blocking(x, y - 1, 'up'):
+                        return True
+                elif not self.is_wall_blocking(x, y, direction):
                     return True
-                else:
-                    print(f"Move up is blocked for pawn {pawn_index} at ({x}, {y})")
-            else:
-                print(f"Move up is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'down':
             if y < 8:
-                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x, y + 1):
-                    print(f"Move down is legal for pawn {pawn_index} at ({x}, {y})")
+                if self.is_position_occupied(x, y + 1):
+                    if y < 7 and not self.is_position_occupied(x, y + 2) and not self.is_wall_blocking(x, y + 1, 'down'):
+                        return True
+                elif not self.is_wall_blocking(x, y, direction):
                     return True
-                else:
-                    print(f"Move down is blocked for pawn {pawn_index} at ({x}, {y})")
-            else:
-                print(f"Move down is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'left':
             if x > 0:
-                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x - 1, y):
-                    print(f"Move left is legal for pawn {pawn_index} at ({x}, {y})")
+                if self.is_position_occupied(x - 1, y):
+                    if x > 1 and not self.is_position_occupied(x - 2, y) and not self.is_wall_blocking(x - 1, y, 'left'):
+                        return True
+                elif not self.is_wall_blocking(x, y, direction):
                     return True
-                else:
-                    print(f"Move left is blocked for pawn {pawn_index} at ({x}, {y})")
-            else:
-                print(f"Move left is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'right':
             if x < 8:
-                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x + 1, y):
-                    print(f"Move right is legal for pawn {pawn_index} at ({x}, {y})")
+                if self.is_position_occupied(x + 1, y):
+                    if x < 7 and not self.is_position_occupied(x + 2, y) and not self.is_wall_blocking(x + 1, y, 'right'):
+                        return True
+                elif not self.is_wall_blocking(x, y, direction):
                     return True
-                else:
-                    print(f"Move right is blocked for pawn {pawn_index} at ({x}, {y})")
-            else:
-                print(f"Move right is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
-        print(f"Move {direction} is not legal for pawn {pawn_index} at ({x}, {y})")
         return False
 
     def is_position_occupied(self, x, y):
@@ -141,13 +132,25 @@ class GameBoard:
 
         x, y = self.pawns[pawn_index]
         if direction == 'up':
-            self.pawns[pawn_index] = (x, y - 1)
+            if self.is_position_occupied(x, y - 1):
+                self.pawns[pawn_index] = (x, y - 2)
+            else:
+                self.pawns[pawn_index] = (x, y - 1)
         elif direction == 'down':
-            self.pawns[pawn_index] = (x, y + 1)
+            if self.is_position_occupied(x, y + 1):
+                self.pawns[pawn_index] = (x, y + 2)
+            else:
+                self.pawns[pawn_index] = (x, y + 1)
         elif direction == 'left':
-            self.pawns[pawn_index] = (x - 1, y)
+            if self.is_position_occupied(x - 1, y):
+                self.pawns[pawn_index] = (x - 2, y)
+            else:
+                self.pawns[pawn_index] = (x - 1, y)
         elif direction == 'right':
-            self.pawns[pawn_index] = (x + 1, y)
+            if self.is_position_occupied(x + 1, y):
+                self.pawns[pawn_index] = (x + 2, y)
+            else:
+                self.pawns[pawn_index] = (x + 1, y)
         return True
 
     def check_winner(self):
