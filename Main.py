@@ -1,6 +1,7 @@
+# Main.py
+
 import tkinter as tk
 from tkinter import messagebox
-
 from game_board import GameBoard
 from game_config_gui import draw_board, on_board_click
 
@@ -33,6 +34,7 @@ def main():
                     switch_turn()
                     selected_pawn[0] = None
                     wall_mode.set(False)  # Exit wall mode after confirming wall
+                    update_wall_count_labels()  # Update the wall count labels
                 else:
                     messagebox.showerror("Invalid Move", "Cannot place wall here.")
             else:
@@ -61,6 +63,18 @@ def main():
     # Label to show current player
     player_turn_label = tk.Label(game_window, text="Player 1's Turn", font=("Arial", 16))
     player_turn_label.pack()
+
+    # Labels to show wall counts
+    wall_count_labels = [
+        tk.Label(game_window, text="Player 1 Walls: 10", font=("Arial", 12)),
+        tk.Label(game_window, text="Player 2 Walls: 10", font=("Arial", 12))
+    ]
+    for label in wall_count_labels:
+        label.pack()
+
+    def update_wall_count_labels():
+        for i, player in enumerate(game_board.players):
+            wall_count_labels[i].config(text=f"Player {i + 1} Walls: {player.wall_count}")
 
     def update_player_turn_label():
         player_turn_label.config(text=f"Player {current_player.get() + 1}'s Turn")
