@@ -91,47 +91,49 @@ class GameBoard:
 
         if direction == 'up':
             if y > 0:
-                if not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x, y - 1):
                     print(f"Move up is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
                 else:
-                    print(f"Move up is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+                    print(f"Move up is blocked for pawn {pawn_index} at ({x}, {y})")
             else:
                 print(f"Move up is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'down':
             if y < 8:
-                if not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x, y + 1):
                     print(f"Move down is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
                 else:
-                    print(f"Move down is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+                    print(f"Move down is blocked for pawn {pawn_index} at ({x}, {y})")
             else:
                 print(f"Move down is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'left':
             if x > 0:
-                if not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x - 1, y):
                     print(f"Move left is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
                 else:
-                    print(f"Move left is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+                    print(f"Move left is blocked for pawn {pawn_index} at ({x}, {y})")
             else:
                 print(f"Move left is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'right':
             if x < 8:
-                if not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x + 1, y):
                     print(f"Move right is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
                 else:
-                    print(f"Move right is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+                    print(f"Move right is blocked for pawn {pawn_index} at ({x}, {y})")
             else:
                 print(f"Move right is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         print(f"Move {direction} is not legal for pawn {pawn_index} at ({x}, {y})")
         return False
 
+    def is_position_occupied(self, x, y):
+        return any(px == x and py == y for px, py in self.pawns)
 
     def move_pawn(self, pawn_index, direction):
         if not self.is_move_legal(pawn_index, direction):
