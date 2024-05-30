@@ -1,4 +1,4 @@
-# game_board.py
+from collections import deque
 
 from player import Player
 
@@ -32,31 +32,75 @@ class GameBoard:
             player.wall_count -= 1
             return True
         return False
+    
+    def bfs(self, start, goal_row):
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Down, up, right, left
+        queue = deque([start])
+        visited = set([start])
+
+        print(f"Starting BFS from: {start} to goal row: {goal_row}")
+
+        while queue:
+            x, y = queue.popleft()
+            if y == goal_row:
+                print(f"Found path to goal row: {goal_row} from {start}")
+                return True
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < 9 and 0 <= ny < 9 and (nx, ny) not in visited:
+                    if not self.is_wall_blocking(x, y, 'down' if dy == 1 else 'up' if dy == -1 else 'right' if dx == 1 else 'left'):
+                        queue.append((nx, ny))
+                        visited.add((nx, ny))
+        print(f"No path found to goal row: {goal_row} from {start}")
+        return False
+
 
     def is_wall_placement_valid(self, x, y, orientation):
         # Ensure the wall is within the grid boundaries
         if orientation == 'h':
-            if x < 0 or x >= 8 or y < 0 or y >= 8:  # x range is 0-7 because horizontal walls span across cells
+            if x < 0 or x >= 8 or y < 0 or y >= 8:
+                print(f"Invalid wall position: ({x}, {y}, {orientation}) - out of bounds")
                 return False
         elif orientation == 'v':
-            if x < 0 or x >= 8 or y < 0 or y >= 8:  # y range is 0-7 because vertical walls span across cells
+            if x < 0 or x >= 8 or y < 0 or y >= 8:
+                print(f"Invalid wall position: ({x}, {y}, {orientation}) - out of bounds")
                 return False
 
-        # Check for overlap with existing walls
-        for wx, wy, worientation, _ in self.walls:
+        # Temporarily add the wall to check for valid paths
+        original_walls = self.walls.copy()
+        print(f"Original walls before adding temporary wall: {original_walls}")
+        self.walls.add((x, y, orientation, -1))
+        print(f"Temporarily added wall: ({x}, {y}, {orientation})")
+        print(f"Current walls: {self.walls}")
+
+        # Check for overlap with existing walls (excluding the temporary wall)
+        for wx, wy, worientation, _ in original_walls:
             if orientation == 'h':
                 if worientation == 'h' and ((wx == x and wy == y) or (wx == x + 1 and wy == y) or (wx == x - 1 and wy == y)):
+                    self.walls = original_walls
+                    print(f"Wall overlaps with existing wall: ({wx}, {wy}, {worientation})")
                     return False
                 if worientation == 'v' and (wx == x and wy == y):
+                    self.walls = original_walls
+                    print(f"Wall overlaps with existing wall: ({wx}, {wy}, {worientation})")
                     return False
             if orientation == 'v':
                 if worientation == 'v' and ((wx == x and wy == y) or (wx == x and wy == y + 1) or (wx == x and wy == y - 1)):
+                    self.walls = original_walls
+                    print(f"Wall overlaps with existing wall: ({wx}, {wy}, {worientation})")
                     return False
                 if worientation == 'h' and (wx == x and wy == y):
+                    self.walls = original_walls
+                    print(f"Wall overlaps with existing wall: ({wx}, {wy}, {worientation})")
                     return False
 
-        return True    
-    
+        # Check if all pawns have a valid path to their goal
+        valid_paths = all(self.bfs((px, py), 8 if idx == 0 else 0) for idx, (px, py) in enumerate(self.pawns))
+        self.walls = original_walls
+        print(f"Path valid for all pawns: {valid_paths}")
+
+        return valid_paths
+
     def is_wall_blocking(self, x, y, direction):
         print(f"Checking wall blocking for direction {direction} at ({x}, {y})")
         print(f"Current walls: {self.walls}")
@@ -84,43 +128,52 @@ class GameBoard:
                 return True
         print(f"No wall blocking for direction {direction} at ({x}, {y})")
         return False
-       
+
     def is_move_legal(self, pawn_index, direction):
         x, y = self.pawns[pawn_index]
         print(f"Checking move for pawn {pawn_index} at ({x}, {y}) in direction {direction}")
 
         if direction == 'up':
             if y > 0:
-                if self.is_position_occupied(x, y - 1):
-                    if y > 1 and not self.is_position_occupied(x, y - 2) and not self.is_wall_blocking(x, y - 1, 'up') and not self.is_wall_blocking(x, y, 'up'):
-                        return True
-                elif not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x, y - 1):
+                    print(f"Move up is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
+                else:
+                    print(f"Move up is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+            else:
+                print(f"Move up is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'down':
             if y < 8:
-                if self.is_position_occupied(x, y + 1):
-                    if y < 7 and not self.is_position_occupied(x, y + 2) and not self.is_wall_blocking(x, y + 1, 'down') and not self.is_wall_blocking(x, y, 'down'):
-                        return True
-                elif not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x, y + 1):
+                    print(f"Move down is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
+                else:
+                    print(f"Move down is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+            else:
+                print(f"Move down is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'left':
             if x > 0:
-                if self.is_position_occupied(x - 1, y):
-                    if x > 1 and not self.is_position_occupied(x - 2, y) and not self.is_wall_blocking(x - 1, y, 'left') and not self.is_wall_blocking(x, y, 'left'):
-                        return True
-                elif not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x - 1, y):
+                    print(f"Move left is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
+                else:
+                    print(f"Move left is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+            else:
+                print(f"Move left is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
         elif direction == 'right':
             if x < 8:
-                if self.is_position_occupied(x + 1, y):
-                    if x < 7 and not self.is_position_occupied(x + 2, y) and not self.is_wall_blocking(x + 1, y, 'right') and not self.is_wall_blocking(x, y, 'right'):
-                        return True
-                elif not self.is_wall_blocking(x, y, direction):
+                if not self.is_wall_blocking(x, y, direction) and not self.is_position_occupied(x + 1, y):
+                    print(f"Move right is legal for pawn {pawn_index} at ({x}, {y})")
                     return True
+                else:
+                    print(f"Move right is blocked by a wall for pawn {pawn_index} at ({x}, {y})")
+            else:
+                print(f"Move right is out of bounds for pawn {pawn_index} at ({x}, {y})")
 
+        print(f"Move {direction} is not legal for pawn {pawn_index} at ({x}, {y})")
         return False
 
     def is_position_occupied(self, x, y):
