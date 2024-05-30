@@ -3,13 +3,13 @@ from collections import deque
 from player import Player
 
 class GameBoard:
-    def __init__(self):
+    def __init__(self, player_types):
         self.board = [[None for _ in range(9)] for _ in range(9)]
         self.pawns = [(4, 0), (4, 8)]  # Starting positions for 2-player game
         self.walls = set()
         self.temp_wall = None  # Temporary wall position and orientation (x, y, orientation)
-        self.players = [Player(0), Player(1)]  # Initialize players
-
+        self.players = [Player(0, is_bot=(player_types[0] == 1)), Player(1, is_bot=(player_types[1] == 1))]  # Initialize players with types
+    
     def toggle_temp_wall(self, x, y):
         if self.temp_wall and self.temp_wall[:2] == (x, y):
             new_orientation = 'v' if self.temp_wall[2] == 'h' else 'h'

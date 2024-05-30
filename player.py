@@ -1,3 +1,5 @@
+# player.py
+
 class Player:
     def __init__(self, player_id, is_bot=False):
         self.player_id = player_id

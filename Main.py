@@ -4,15 +4,50 @@ import tkinter as tk
 from tkinter import messagebox
 from game_board import GameBoard
 from game_config_gui import draw_board, on_board_click
+from player import Player
 
-def main():
+def start_screen():
+    def start_game():
+        player_types = [player1_var.get(), player2_var.get()]
+        start_window.destroy()
+        main_game(player_types)
+
+    start_window = tk.Tk()
+    start_window.title("Quoridor Game Start Screen")
+
+    label = tk.Label(start_window, text="Welcome to Quoridor!", font=("Arial", 24))
+    label.pack(pady=20)
+
+    player1_var = tk.IntVar(value=0)  # 0 for human, 1 for bot
+    player2_var = tk.IntVar(value=0)  # 0 for human, 1 for bot
+
+    player1_label = tk.Label(start_window, text="Player 1:", font=("Arial", 16))
+    player1_label.pack(pady=10)
+    player1_human_radio = tk.Radiobutton(start_window, text="Human", variable=player1_var, value=0, font=("Arial", 14))
+    player1_human_radio.pack(pady=5)
+    player1_bot_radio = tk.Radiobutton(start_window, text="Bot", variable=player1_var, value=1, font=("Arial", 14))
+    player1_bot_radio.pack(pady=5)
+
+    player2_label = tk.Label(start_window, text="Player 2:", font=("Arial", 16))
+    player2_label.pack(pady=10)
+    player2_human_radio = tk.Radiobutton(start_window, text="Human", variable=player2_var, value=0, font=("Arial", 14))
+    player2_human_radio.pack(pady=5)
+    player2_bot_radio = tk.Radiobutton(start_window, text="Bot", variable=player2_var, value=1, font=("Arial", 14))
+    player2_bot_radio.pack(pady=5)
+
+    start_button = tk.Button(start_window, text="Start Game", command=start_game, font=("Arial", 16))
+    start_button.pack(pady=20)
+
+    start_window.mainloop()
+
+def main_game(player_types):
     game_window = tk.Tk()
     game_window.title("Quoridor Game")
 
     canvas = tk.Canvas(game_window, width=400, height=400)
     canvas.pack()
 
-    game_board = GameBoard()
+    game_board = GameBoard(player_types)
     wall_mode = tk.BooleanVar()
     wall_mode.set(False)
     current_player = tk.IntVar()
@@ -87,4 +122,4 @@ def main():
     game_window.mainloop()
 
 if __name__ == "__main__":
-    main()
+    start_screen()
