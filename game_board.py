@@ -92,7 +92,7 @@ class GameBoard:
         if direction == 'up':
             if y > 0:
                 if self.is_position_occupied(x, y - 1):
-                    if y > 1 and not self.is_position_occupied(x, y - 2) and not self.is_wall_blocking(x, y - 1, 'up'):
+                    if y > 1 and not self.is_position_occupied(x, y - 2) and not self.is_wall_blocking(x, y - 1, 'up') and not self.is_wall_blocking(x, y, 'up'):
                         return True
                 elif not self.is_wall_blocking(x, y, direction):
                     return True
@@ -100,7 +100,7 @@ class GameBoard:
         elif direction == 'down':
             if y < 8:
                 if self.is_position_occupied(x, y + 1):
-                    if y < 7 and not self.is_position_occupied(x, y + 2) and not self.is_wall_blocking(x, y + 1, 'down'):
+                    if y < 7 and not self.is_position_occupied(x, y + 2) and not self.is_wall_blocking(x, y + 1, 'down') and not self.is_wall_blocking(x, y, 'down'):
                         return True
                 elif not self.is_wall_blocking(x, y, direction):
                     return True
@@ -108,7 +108,7 @@ class GameBoard:
         elif direction == 'left':
             if x > 0:
                 if self.is_position_occupied(x - 1, y):
-                    if x > 1 and not self.is_position_occupied(x - 2, y) and not self.is_wall_blocking(x - 1, y, 'left'):
+                    if x > 1 and not self.is_position_occupied(x - 2, y) and not self.is_wall_blocking(x - 1, y, 'left') and not self.is_wall_blocking(x, y, 'left'):
                         return True
                 elif not self.is_wall_blocking(x, y, direction):
                     return True
@@ -116,7 +116,7 @@ class GameBoard:
         elif direction == 'right':
             if x < 8:
                 if self.is_position_occupied(x + 1, y):
-                    if x < 7 and not self.is_position_occupied(x + 2, y) and not self.is_wall_blocking(x + 1, y, 'right'):
+                    if x < 7 and not self.is_position_occupied(x + 2, y) and not self.is_wall_blocking(x + 1, y, 'right') and not self.is_wall_blocking(x, y, 'right'):
                         return True
                 elif not self.is_wall_blocking(x, y, direction):
                     return True
