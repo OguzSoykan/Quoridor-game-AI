@@ -20,29 +20,43 @@ class GameBoard:
     def confirm_wall(self, player_index):
         if not self.temp_wall:
             return False
-        
+
         player = self.players[player_index]
         if player.wall_count <= 0:
             return False
-        
+
         x, y, orientation = self.temp_wall
         if self.is_wall_placement_valid(x, y, orientation):
             self.walls.add((x, y, orientation, player_index))
-            print(f"Wall added at: {(x, y, orientation)}")
             self.temp_wall = None
-            player.wall_count -= 1  # Decrease the wall count
+            player.wall_count -= 1
             return True
         return False
 
     def is_wall_placement_valid(self, x, y, orientation):
-        # Ensure walls don't overlap and don't block all paths
-        for wx, wy, worientation, _ in self.walls:
-            if (x, y) == (wx, wy) and orientation == worientation:
+        # Ensure the wall is within the grid boundaries
+        if orientation == 'h':
+            if x < 0 or x >= 8 or y < 0 or y >= 8:  # x range is 0-7 because horizontal walls span across cells
                 return False
-        return True
+        elif orientation == 'v':
+            if x < 0 or x >= 8 or y < 0 or y >= 8:  # y range is 0-7 because vertical walls span across cells
+                return False
 
+        # Check for overlap with existing walls
+        for wx, wy, worientation, _ in self.walls:
+            if orientation == 'h':
+                if worientation == 'h' and ((wx == x and wy == y) or (wx == x + 1 and wy == y) or (wx == x - 1 and wy == y)):
+                    return False
+                if worientation == 'v' and (wx == x and wy == y):
+                    return False
+            if orientation == 'v':
+                if worientation == 'v' and ((wx == x and wy == y) or (wx == x and wy == y + 1) or (wx == x and wy == y - 1)):
+                    return False
+                if worientation == 'h' and (wx == x and wy == y):
+                    return False
 
-
+        return True    
+    
     def is_wall_blocking(self, x, y, direction):
         print(f"Checking wall blocking for direction {direction} at ({x}, {y})")
         print(f"Current walls: {self.walls}")
