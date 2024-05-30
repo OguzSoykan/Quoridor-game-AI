@@ -6,8 +6,6 @@ def toggle_wall_mode(wall_mode_var, button=None):
     wall_mode_var.set(not wall_mode_var.get())
     if button:
         button.config(text="Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
-    # Commented out print statement
-    # print("Wall Mode: " + ("On" if wall_mode_var.get() else "Off"))
 
 def update_player_options(num_pawns_var, player_checkbuttons):
     num_pawns = int(num_pawns_var.get())
@@ -65,21 +63,6 @@ def draw_board(canvas, game_board, selected_pawn=None):
         elif orientation == 'v':
             canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="green", width=4, dash=(2, 2))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def determine_direction(x, y, current_x, current_y):
     # Commented out print statement
     # print(f"Determining direction: current ({current_x}, {current_y}), target ({x}, {y})")
@@ -95,12 +78,10 @@ def determine_direction(x, y, current_x, current_y):
 
 def on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window):
     x, y = event.x // 40, event.y // 40  # Convert pixel coordinates to grid indices
-    print(f"Board click at ({x}, {y})")
 
     if wall_mode.get():
         game_board.toggle_temp_wall(x, y)
         draw_board(canvas, game_board)
-        print(f"Toggled wall at ({x}, {y})")
     else:
         # Pawn movement handling
         if selected_pawn[0] is None:
@@ -147,28 +128,9 @@ def on_board_click(event, canvas, game_board, wall_mode, current_player, selecte
         draw_board(canvas, game_board, selected_pawn[0])
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
 def start_game(root, num_pawns_var, player_types_var, wall_mode_var, current_player):
-    # Commented out print statements
-    # print("Game settings:")
-    # print(f"Number of pawns: {num_pawns_var.get()}")
+
     for i in range(int(num_pawns_var.get())):
-        # print(f"Player {i + 1}: {'Bot' if player_types_var[i].get() == 1 else 'Human'}")
         pass
 
     root.withdraw()  # Hide the initial setup window

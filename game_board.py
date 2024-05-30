@@ -12,10 +12,8 @@ class GameBoard:
         if self.temp_wall and self.temp_wall[:2] == (x, y):
             new_orientation = 'v' if self.temp_wall[2] == 'h' else 'h'
             self.temp_wall = (x, y, new_orientation)
-            print(f"Toggled to {new_orientation} wall at ({x}, {y})")
         else:
             self.temp_wall = (x, y, 'h')
-            print(f"Placed horizontal temporary wall at ({x}, {y})")
 
     def confirm_wall(self, player_index):
         if not self.temp_wall:
@@ -39,9 +37,6 @@ class GameBoard:
             if (x, y) == (wx, wy) and orientation == worientation:
                 return False
         return True
-
-    # Other methods remain unchanged...
-
 
     def is_move_legal(self, pawn_index, direction):
         # Simplified example logic for move legality

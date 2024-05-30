@@ -20,9 +20,8 @@ def main():
 
     def toggle_wall_mode():
         wall_mode.set(not wall_mode.get())
-        print(f"Wall mode set to {wall_mode.get()}")
 
-    wall_button = tk.Button(game_window, text="Toggle Wall Mode", command=toggle_wall_mode)
+    wall_button = tk.Button(game_window, text="Place Wall", command=toggle_wall_mode)
     wall_button.pack()
 
     def confirm_wall_placement():
@@ -34,10 +33,8 @@ def main():
                     switch_turn()
                     selected_pawn[0] = None
                     wall_mode.set(False)  # Exit wall mode after confirming wall
-                    print(f"Wall confirmed at {game_board.temp_wall[:2]} by player {current_player.get()}")
                 else:
                     messagebox.showerror("Invalid Move", "Cannot place wall here.")
-                    print("Invalid wall placement attempt")
             else:
                 messagebox.showinfo("No Walls Left", "You have no walls left.")
         else:
@@ -50,9 +47,7 @@ def main():
         if game_board.temp_wall:
             game_board.temp_wall = None
             draw_board(canvas, game_board)
-            print("Wall placement canceled")
         wall_mode.set(False)  # Exit wall mode
-        print("Exited wall mode")
 
     cancel_button = tk.Button(game_window, text="Cancel Wall Placement", command=cancel_wall_placement)
     cancel_button.pack()
