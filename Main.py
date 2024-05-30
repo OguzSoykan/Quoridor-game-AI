@@ -27,15 +27,19 @@ def main():
 
     def confirm_wall_placement():
         if game_board.temp_wall:
-            if game_board.confirm_wall(current_player.get()):
-                draw_board(canvas, game_board)
-                switch_turn()
-                selected_pawn[0] = None
-                wall_mode.set(False)  # Exit wall mode after confirming wall
-                print(f"Wall confirmed at {game_board.temp_wall[:2]} by player {current_player.get()}")
+            player = game_board.players[current_player.get()]
+            if player.wall_count > 0:
+                if game_board.confirm_wall(current_player.get()):
+                    draw_board(canvas, game_board)
+                    switch_turn()
+                    selected_pawn[0] = None
+                    wall_mode.set(False)  # Exit wall mode after confirming wall
+                    print(f"Wall confirmed at {game_board.temp_wall[:2]} by player {current_player.get()}")
+                else:
+                    messagebox.showerror("Invalid Move", "Cannot place wall here.")
+                    print("Invalid wall placement attempt")
             else:
-                messagebox.showerror("Invalid Move", "Cannot place wall here.")
-                print("Invalid wall placement attempt")
+                messagebox.showinfo("No Walls Left", "You have no walls left.")
         else:
             messagebox.showinfo("No Wall", "No temporary wall to confirm.")
 

@@ -1,9 +1,12 @@
+from player import Player
+
 class GameBoard:
     def __init__(self):
         self.board = [[None for _ in range(9)] for _ in range(9)]
         self.pawns = [(4, 0), (4, 8)]  # Starting positions for 2-player game
         self.walls = set()
         self.temp_wall = None  # Temporary wall position and orientation (x, y, orientation)
+        self.players = [Player(0), Player(1)]  # Initialize players
 
     def toggle_temp_wall(self, x, y):
         if self.temp_wall and self.temp_wall[:2] == (x, y):
@@ -18,10 +21,15 @@ class GameBoard:
         if not self.temp_wall:
             return False
         
+        player = self.players[player_index]
+        if player.wall_count <= 0:
+            return False
+        
         x, y, orientation = self.temp_wall
         if self.is_wall_placement_valid(x, y, orientation):
             self.walls.add((x, y, orientation, player_index))
             self.temp_wall = None
+            player.wall_count -= 1  # Decrease the wall count
             return True
         return False
 
@@ -31,6 +39,9 @@ class GameBoard:
             if (x, y) == (wx, wy) and orientation == worientation:
                 return False
         return True
+
+    # Other methods remain unchanged...
+
 
     def is_move_legal(self, pawn_index, direction):
         # Simplified example logic for move legality
