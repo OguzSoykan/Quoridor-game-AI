@@ -33,17 +33,13 @@ class MCTSNode:
 
         # Validate move before applying it
         if move[0] == 'move' and not next_state.is_move_legal(self.game_state.current_player(), move[1]):
-            print(f"Invalid move {move} during expansion")
             return None
 
         next_state.make_move(self.game_state.current_player(), move)
         next_state.switch_turn()
         child_node = MCTSNode(next_state, parent=self, move=move)
         self.children.append(child_node)
-        print(f"Expanded node with move: {move}")
         return child_node
-
-
 
     def rollout(self):
         current_rollout_state = self.game_state.clone()
@@ -62,7 +58,6 @@ class MCTSNode:
             current_rollout_state.make_move(current_rollout_state.current_player(), move)
             current_rollout_state.switch_turn()
             depth += 1
-        print(f"Rollout result: {current_rollout_state.check_winner()}, depth: {depth}")
         return current_rollout_state.check_winner()
 
     def backpropagate(self, result):
@@ -71,7 +66,6 @@ class MCTSNode:
             self.wins += 1
         if self.parent:
             self.parent.backpropagate(result)
-        print(f"Backpropagating result: {result}, current node visits: {self.visits}, wins: {self.wins}")
 
 def mcts(game_state, num_simulations, max_time=5.0):
     root = MCTSNode(game_state)
@@ -90,16 +84,21 @@ def mcts(game_state, num_simulations, max_time=5.0):
             node.backpropagate(result)
 
     best_move = root.best_child(c_param=0.0).move
-    print(f"Best move determined by MCTS: {best_move}")
     return best_move
+
+def evaluate_wall_placement(game_board, player_index, wall_position):
+    x, y, orientation = wall_position
+    game_board.place_wall(player_index, wall_position)
+    opponent_index = 1 - player_index
+    opponent_path_length = len(game_board.get_shortest_path(opponent_index))
+    game_board.undo_move(player_index, ('wall', wall_position))
+    return opponent_path_length
 
 def bot_decision(game_board, bot_player_index):
     num_simulations = 1000
     player = game_board.players[bot_player_index]
 
     possible_moves = game_board.get_all_possible_moves(bot_player_index)
-    print(f"Possible moves for bot: {possible_moves}")  # Debugging information
-
     valid_moves = []
     for move in possible_moves:
         if move[0] == 'move' and game_board.is_move_legal(bot_player_index, move[1]):
@@ -107,10 +106,13 @@ def bot_decision(game_board, bot_player_index):
         elif move[0] == 'wall' and game_board.is_wall_placement_valid(*move[1]):
             valid_moves.append(move)
 
-    print(f"Valid moves for bot: {valid_moves}")  # Debugging information
-
     if player.wall_count > 0 and 'wall' in (move[0] for move in valid_moves):
-        best_move = mcts(game_board, num_simulations)
+        blocking_walls = [(move, evaluate_wall_placement(game_board, bot_player_index, move[1])) for move in valid_moves if move[0] == 'wall']
+        if blocking_walls:
+            best_wall = max(blocking_walls, key=lambda x: x[1])[0]
+            best_move = best_wall
+        else:
+            best_move = mcts(game_board, num_simulations)
     else:
         valid_moves = [move for move in valid_moves if move[0] == 'move']
         if valid_moves:
@@ -118,15 +120,4 @@ def bot_decision(game_board, bot_player_index):
         else:
             best_move = ('move', 'down')  # Fallback move
 
-    print(f"Bot decision: {best_move}")  # Debugging information
     return best_move
-
-
-
-
-
-
-
-
-
-

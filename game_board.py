@@ -49,6 +49,26 @@ class GameBoard:
                         queue.append((nx, ny))
                         visited.add((nx, ny))
         return False
+    
+    def get_shortest_path(self, player_index):
+        start = self.pawns[player_index]
+        goal_row = 8 if player_index == 0 else 0
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # Down, up, right, left
+        queue = deque([(start, [])])
+        visited = set([start])
+
+        while queue:
+            (x, y), path = queue.popleft()
+            if y == goal_row:
+                return path + [(x, y)]
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < 9 and 0 <= ny < 9 and (nx, ny) not in visited and not self.is_wall_blocking(x, y, 'down' if dy == 1 else 'up' if dy == -1 else 'right' if dx == 1 else 'left'):
+                    queue.append(((nx, ny), path + [(x, y)]))
+                    visited.add((nx, ny))
+        return None
+
+
 
     def is_wall_placement_valid(self, x, y, orientation):
         if orientation == 'h':
