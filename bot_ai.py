@@ -44,7 +44,7 @@ class MCTSNode:
     def rollout(self):
         current_rollout_state = self.game_state.clone()
         depth = 0
-        max_depth = 50  # Limit depth to prevent infinite rollouts
+        max_depth = 120  # Limit depth to prevent infinite rollouts
         while not current_rollout_state.check_winner() and depth < max_depth:
             possible_moves = current_rollout_state.get_all_possible_moves(current_rollout_state.current_player())
             if not possible_moves:
@@ -101,7 +101,7 @@ def evaluate_wall_placement(game_board, player_index, wall_position):
 
 
 def bot_decision(game_board, bot_player_index):
-    num_simulations = 1000
+    num_simulations = 50000
     player = game_board.players[bot_player_index]
 
     possible_moves = game_board.get_all_possible_moves(bot_player_index)
@@ -140,7 +140,6 @@ def bot_decision(game_board, bot_player_index):
 
     print(f"Bot {bot_player_index}: Moving to {best_move}")
     return best_move
-
 
 
 
