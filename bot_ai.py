@@ -88,11 +88,17 @@ def mcts(game_state, num_simulations, max_time=5.0):
 
 def evaluate_wall_placement(game_board, player_index, wall_position):
     x, y, orientation = wall_position
-    game_board.place_wall(player_index, wall_position)
     opponent_index = 1 - player_index
+
+    # Temporarily place the wall
+    game_board.walls.add((x, y, orientation, player_index))
     opponent_path_length = len(game_board.get_shortest_path(opponent_index))
-    game_board.undo_move(player_index, ('wall', wall_position))
+    # Remove the wall after evaluation
+    game_board.walls.remove((x, y, orientation, player_index))
+
     return opponent_path_length
+
+
 
 def bot_decision(game_board, bot_player_index):
     num_simulations = 1000
@@ -106,13 +112,24 @@ def bot_decision(game_board, bot_player_index):
         elif move[0] == 'wall' and game_board.is_wall_placement_valid(*move[1]):
             valid_moves.append(move)
 
+    print(f"Bot {bot_player_index}: Valid moves - {valid_moves}")
+
+    # If there are walls left, evaluate the best wall placement
     if player.wall_count > 0 and any(move[0] == 'wall' for move in valid_moves):
         blocking_walls = [(move, evaluate_wall_placement(game_board, bot_player_index, move[1])) for move in valid_moves if move[0] == 'wall']
+        print(f"Bot {bot_player_index}: Blocking walls - {blocking_walls}")
         if blocking_walls:
-            best_wall = max(blocking_walls, key=lambda x: x[1])[0]
-            return best_wall
+            # Extract the path length value correctly
+            best_wall, best_wall_path_length = max(blocking_walls, key=lambda x: x[1])
+            # Calculate the bot's own shortest path length
+            bot_path_length = len(game_board.get_shortest_path(bot_player_index))
+            print(f"Bot {bot_player_index}: Best wall - {best_wall}, Opponent path length - {best_wall_path_length}, Bot path length - {bot_path_length}")
+            # If the best wall placement significantly increases the opponent's path, choose to place the wall
+            if best_wall_path_length > bot_path_length:  # Adjust the threshold as needed
+                print(f"Bot {bot_player_index}: Placing wall at {best_wall}")
+                return best_wall
 
-    # If no walls left or no valid wall moves, go for winning
+    # If no walls left or no beneficial wall moves, go for winning
     valid_moves = [move for move in valid_moves if move[0] == 'move']
     if valid_moves:
         goal_row = 8 if bot_player_index == 0 else 0
@@ -121,6 +138,11 @@ def bot_decision(game_board, bot_player_index):
     else:
         best_move = ('move', 'down')  # Fallback move
 
+    print(f"Bot {bot_player_index}: Moving to {best_move}")
     return best_move
+
+
+
+
 
 
