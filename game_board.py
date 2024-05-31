@@ -204,19 +204,6 @@ class GameBoard:
 
         return True
 
-        if new_position:
-            new_x, new_y = new_position
-            # Ensure the move is only one square
-            if abs(new_x - x) > 1 or abs(new_y - y) > 1:
-                print(f"Illegal move detected: {direction}, from ({x}, {y}) to ({new_x}, {new_y})")
-                return False
-            self.pawns[pawn_index] = new_position
-            print(f"After moving pawn {pawn_index}: {self.pawns}")
-            return True
-
-        print(f"Illegal move attempt: {direction}")
-        return False
-
 
     def place_wall(self, player_index, wall_detail):
         x, y, orientation = wall_detail
