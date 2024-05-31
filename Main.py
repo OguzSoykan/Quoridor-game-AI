@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import messagebox
 from game_board import GameBoard
@@ -6,7 +5,6 @@ from game_config_gui import draw_board, on_board_click
 from player import Player
 import time
 from bot_ai import bot_decision
-
 
 def start_screen():
     def start_game():
@@ -140,8 +138,8 @@ def main_game(player_types):
                     return
                 switch_turn()
 
-
     draw_board(canvas, game_board)
+    check_ai_turn()  # Check if AI needs to move at the start of the game
     game_window.mainloop()
 
 if __name__ == "__main__":
