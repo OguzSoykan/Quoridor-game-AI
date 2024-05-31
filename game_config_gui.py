@@ -44,7 +44,7 @@ def draw_board(canvas, game_board, selected_pawn=None):
 
     # Draw pawns (draw after potential moves to avoid overlaps)
     for idx, (x, y) in enumerate(game_board.pawns):
-        fill_color = "black" if idx == 0 else "red"
+        fill_color = "blue" if idx == 0 else "red"
         canvas.create_oval(x * 40 + 10, y * 40 + 10, x * 40 + 30, y * 40 + 30, fill=fill_color)
 
     # Draw walls (draw after pawns to avoid overlaps)
@@ -59,9 +59,9 @@ def draw_board(canvas, game_board, selected_pawn=None):
     if game_board.temp_wall:
         wx, wy, orientation = game_board.temp_wall
         if orientation == 'h':
-            canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill="green", width=4, dash=(2, 2))
+            canvas.create_line(wx * 40 + 5, wy * 40 + 40, wx * 40 + 75, wy * 40 + 40, fill="blue", width=4, dash=(2, 2))
         elif orientation == 'v':
-            canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="green", width=4, dash=(2, 2))
+            canvas.create_line(wx * 40 + 40, wy * 40 + 5, wx * 40 + 40, wy * 40 + 75, fill="blue", width=4, dash=(2, 2))
 
     print("Finished drawing the board and potential moves.")
 

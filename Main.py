@@ -72,8 +72,18 @@ class MainWindow(QMainWindow):
         def toggle_wall_mode():
             wall_mode.set(not wall_mode.get())
 
-        wall_button = tk.Button(game_window, text="Place Wall", command=toggle_wall_mode)
-        wall_button.pack()
+        wall_button = tk.Button(
+            game_window,
+            text="Place Wall",
+            command=toggle_wall_mode,
+            bg="#FFEB3B",  # Background color (yellow)
+            fg="black",  # Foreground (text) color
+            font=("Arial", 12, "bold"),  # Font style
+            activebackground="#FBC02D",  # Background color when active (darker yellow)
+            activeforeground="black",  # Foreground (text) color when active
+            borderwidth=2  # Border width
+        )
+        wall_button.pack(pady=2)
 
         def confirm_wall_placement():
             if game_board.temp_wall:
@@ -92,8 +102,18 @@ class MainWindow(QMainWindow):
             else:
                 messagebox.showinfo("No Wall", "No temporary wall to confirm.")
 
-        confirm_button = tk.Button(game_window, text="Confirm Wall Placement", command=confirm_wall_placement)
-        confirm_button.pack()
+        confirm_button = tk.Button(
+            game_window,
+            text="Confirm Wall Placement",
+            command=confirm_wall_placement,
+            bg="#4CAF50",  # Background color
+            fg="white",  # Foreground (text) color
+            font=("Arial", 12, "bold"),  # Font style
+            activebackground="#45a049",  # Background color when active
+            activeforeground="white",  # Foreground (text) color when active
+            borderwidth=2  # Border width
+        )
+        confirm_button.pack(pady=2)  # Add some padding to space it out
 
         def cancel_wall_placement():
             if game_board.temp_wall:
@@ -101,8 +121,18 @@ class MainWindow(QMainWindow):
                 draw_board(canvas, game_board)
             wall_mode.set(False)
 
-        cancel_button = tk.Button(game_window, text="Cancel Wall Placement", command=cancel_wall_placement)
-        cancel_button.pack()
+        cancel_button = tk.Button(
+            game_window,
+            text="Cancel Wall Placement",
+            command=cancel_wall_placement,
+            bg="#f44336",  # Background color (red)
+            fg="white",  # Foreground (text) color
+            font=("Arial", 12, "bold"),  # Font style
+            activebackground="#d32f2f",  # Background color when active (darker red)
+            activeforeground="white",  # Foreground (text) color when active
+            borderwidth=2  # Border width
+        )
+        cancel_button.pack(pady=2)
 
         def on_canvas_click(event):
             on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window)
