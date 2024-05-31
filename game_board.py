@@ -66,7 +66,26 @@ class GameBoard:
                 if 0 <= nx < 9 and 0 <= ny < 9 and (nx, ny) not in visited and not self.is_wall_blocking(x, y, 'down' if dy == 1 else 'up' if dy == -1 else 'right' if dx == 1 else 'left'):
                     queue.append(((nx, ny), path + [(x, y)]))
                     visited.add((nx, ny))
-        return None
+        return []
+    
+    def get_shortest_path_length(self, player_index, move):
+        original_position = self.pawns[player_index]
+        x, y = original_position
+
+        if move == 'up':
+            self.pawns[player_index] = (x, y - 1)
+        elif move == 'down':
+            self.pawns[player_index] = (x, y + 1)
+        elif move == 'left':
+            self.pawns[player_index] = (x - 1, y)
+        elif move == 'right':
+            self.pawns[player_index] = (x + 1, y)
+
+        path_length = len(self.get_shortest_path(player_index))
+
+        self.pawns[player_index] = original_position
+        return path_length
+
 
 
 

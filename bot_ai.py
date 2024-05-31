@@ -106,18 +106,21 @@ def bot_decision(game_board, bot_player_index):
         elif move[0] == 'wall' and game_board.is_wall_placement_valid(*move[1]):
             valid_moves.append(move)
 
-    if player.wall_count > 0 and 'wall' in (move[0] for move in valid_moves):
+    if player.wall_count > 0 and any(move[0] == 'wall' for move in valid_moves):
         blocking_walls = [(move, evaluate_wall_placement(game_board, bot_player_index, move[1])) for move in valid_moves if move[0] == 'wall']
         if blocking_walls:
             best_wall = max(blocking_walls, key=lambda x: x[1])[0]
-            best_move = best_wall
-        else:
-            best_move = mcts(game_board, num_simulations)
+            return best_wall
+
+    # If no walls left or no valid wall moves, go for winning
+    valid_moves = [move for move in valid_moves if move[0] == 'move']
+    if valid_moves:
+        goal_row = 8 if bot_player_index == 0 else 0
+        valid_moves.sort(key=lambda move: game_board.get_shortest_path_length(bot_player_index, move[1]))
+        best_move = valid_moves[0]
     else:
-        valid_moves = [move for move in valid_moves if move[0] == 'move']
-        if valid_moves:
-            best_move = random.choice(valid_moves)
-        else:
-            best_move = ('move', 'down')  # Fallback move
+        best_move = ('move', 'down')  # Fallback move
 
     return best_move
+
+
