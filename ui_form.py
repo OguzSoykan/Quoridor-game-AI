@@ -81,6 +81,17 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.player2Label, 1, 2, 1, 1)
 
+        self.botImage1 = QLabel(self.centralwidget)
+        self.botImage1.setObjectName(u"botImage1")
+        sizePolicy.setHeightForWidth(self.botImage1.sizePolicy().hasHeightForWidth())
+        self.botImage1.setSizePolicy(sizePolicy)
+        self.botImage1.setMinimumSize(QSize(50, 50))
+        self.botImage1.setMaximumSize(QSize(50, 50))
+        self.botImage1.setScaledContents(True)
+        self.botImage1.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout.addWidget(self.botImage1, 0, 4, 1, 1)
+
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.startButton = QPushButton(self.centralwidget)
@@ -100,29 +111,26 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addLayout(self.horizontalLayout, 3, 1, 1, 3)
 
-        self.horizontalSpacer = QSpacerItem(50, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.botImage2 = QLabel(self.centralwidget)
+        self.botImage2.setObjectName(u"botImage2")
+        sizePolicy.setHeightForWidth(self.botImage2.sizePolicy().hasHeightForWidth())
+        self.botImage2.setSizePolicy(sizePolicy)
+        self.botImage2.setMinimumSize(QSize(50, 50))
+        self.botImage2.setMaximumSize(QSize(50, 50))
+        self.botImage2.setScaledContents(True)
+        self.botImage2.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout.addItem(self.horizontalSpacer, 0, 4, 1, 1)
-
-        self.botImage = QLabel(self.centralwidget)
-        self.botImage.setObjectName(u"botImage")
-        sizePolicy.setHeightForWidth(self.botImage.sizePolicy().hasHeightForWidth())
-        self.botImage.setSizePolicy(sizePolicy)
-        self.botImage.setMinimumSize(QSize(50, 50))
-        self.botImage.setMaximumSize(QSize(50, 50))
-        self.botImage.setScaledContents(True)
-        self.botImage.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout.addWidget(self.botImage, 1, 4, 1, 1)
+        self.gridLayout.addWidget(self.botImage2, 1, 4, 1, 1)
 
         self.player1Box = QComboBox(self.centralwidget)
-        self.player1Box.addItem("")
+        self.player1Box.addItem(icon, "")
+        self.player1Box.addItem(icon1, "")
         self.player1Box.setObjectName(u"player1Box")
-        self.player1Box.setEnabled(False)
+        self.player1Box.setEnabled(True)
 
         self.gridLayout.addWidget(self.player1Box, 0, 3, 1, 1)
 
-        self.horizontalSpacer_2 = QSpacerItem(50, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_2 = QSpacerItem(46, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
 
         self.gridLayout.addItem(self.horizontalSpacer_2, 0, 0, 1, 1)
 
@@ -142,10 +150,12 @@ class Ui_MainWindow(object):
         self.player2Box.setItemText(1, QCoreApplication.translate("MainWindow", u"Bot", None))
 
         self.player2Label.setText(QCoreApplication.translate("MainWindow", u"Player 2", None))
+        self.botImage1.setText("")
         self.startButton.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.exitButton.setText(QCoreApplication.translate("MainWindow", u"Exit", None))
-        self.botImage.setText(QCoreApplication.translate("MainWindow", u"botImage", None))
+        self.botImage2.setText("")
         self.player1Box.setItemText(0, QCoreApplication.translate("MainWindow", u"Human", None))
+        self.player1Box.setItemText(1, QCoreApplication.translate("MainWindow", u"Bot", None))
 
     # retranslateUi
 

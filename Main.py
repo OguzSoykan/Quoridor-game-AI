@@ -20,25 +20,37 @@ class MainWindow(QMainWindow):
 
         self.ui.player1Image.setPixmap(QPixmap("images/player1.png"))
         self.ui.player2Image.setPixmap(QPixmap("images/player2.png"))
-        self.ui.botImage.clear() # while creating on qt creator I put text to not confuse, and I dont want it show on start screen
+
+        self.ui.botImage1.clear() # while creating on qt creator I put text to not confuse, and I dont want it show on start screen
+        self.ui.botImage2.clear() # while creating on qt creator I put text to not confuse, and I dont want it show on start screen
+
         self.setWindowIcon(QPixmap("images/multi_pawn_icon.png")) # set window icon
 
-        self.player1_var = 0    # Always human, so 0
-        self.player2_var = self.ui.player2Box.currentIndexChanged.connect(self.comboBoxChanged)
+        self.player1_var = self.ui.player1Box.currentIndexChanged.connect(self.comboBoxChanged1)
+        self.player2_var = self.ui.player2Box.currentIndexChanged.connect(self.comboBoxChanged2)
 
         self.ui.startButton.clicked.connect(self.start_game)  # start button
         self.ui.exitButton.clicked.connect(sys.exit)  # exit button
 
-    def comboBoxChanged(self):
-        if self.ui.player2Box.currentIndex() == 0:
-            self.ui.botImage.clear() # clear bot image after human is selected
+    def comboBoxChanged1(self):
+        if self.ui.player1Box.currentIndex() == 0:
+            self.ui.botImage1.clear()  # clear bot image after human is selected
             return 0
+
+        elif self.ui.player1Box.currentIndex() == 1:
+            self.ui.botImage1.setPixmap(QPixmap("images/bot.png"))  # show bot image if bot is selected
+            return 1
+    def comboBoxChanged2(self):
+        if self.ui.player2Box.currentIndex() == 0:
+            self.ui.botImage2.clear()  # clear bot image after human is selected
+            return 0
+
         elif self.ui.player2Box.currentIndex() == 1:
-            self.ui.botImage.setPixmap(QPixmap("images/bot.png"))  # show bot image if bot is selected
+            self.ui.botImage2.setPixmap(QPixmap("images/bot.png"))  # show bot image if bot is selected
             return 1
 
     def start_game(self):
-        player_types = [self.player1_var, self.comboBoxChanged()]  # store player types chosen
+        player_types = [self.comboBoxChanged1(), self.comboBoxChanged2()]  # store player types chosen
         self.main_game(player_types)
 
     def main_game(self, player_types):
