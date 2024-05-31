@@ -1,10 +1,12 @@
-# Main.py
 
 import tkinter as tk
 from tkinter import messagebox
 from game_board import GameBoard
 from game_config_gui import draw_board, on_board_click
 from player import Player
+import time
+from bot_ai import bot_decision
+
 
 def start_screen():
     def start_game():
@@ -68,8 +70,8 @@ def main_game(player_types):
                     draw_board(canvas, game_board)
                     switch_turn()
                     selected_pawn[0] = None
-                    wall_mode.set(False)  # Exit wall mode after confirming wall
-                    update_wall_count_labels()  # Update the wall count labels
+                    wall_mode.set(False)
+                    update_wall_count_labels()
                 else:
                     messagebox.showerror("Invalid Move", "Cannot place wall here.")
             else:
@@ -84,7 +86,7 @@ def main_game(player_types):
         if game_board.temp_wall:
             game_board.temp_wall = None
             draw_board(canvas, game_board)
-        wall_mode.set(False)  # Exit wall mode
+        wall_mode.set(False)
 
     cancel_button = tk.Button(game_window, text="Cancel Wall Placement", command=cancel_wall_placement)
     cancel_button.pack()
@@ -92,14 +94,13 @@ def main_game(player_types):
     def on_canvas_click(event):
         on_board_click(event, canvas, game_board, wall_mode, current_player, selected_pawn, game_window)
         update_player_turn_label()
+        check_ai_turn()
 
     canvas.bind("<Button-1>", on_canvas_click)
 
-    # Label to show current player
     player_turn_label = tk.Label(game_window, text="Player 1's Turn", font=("Arial", 16))
     player_turn_label.pack()
 
-    # Labels to show wall counts
     wall_count_labels = [
         tk.Label(game_window, text="Player 1 Walls: 10", font=("Arial", 12)),
         tk.Label(game_window, text="Player 2 Walls: 10", font=("Arial", 12))
@@ -117,6 +118,28 @@ def main_game(player_types):
     def switch_turn():
         current_player.set(1 - current_player.get())
         update_player_turn_label()
+        check_ai_turn()
+
+    def check_ai_turn():
+        player = game_board.players[current_player.get()]
+        if player.is_bot:
+            game_window.after(1000, execute_bot_move)
+
+    def execute_bot_move():
+        player = game_board.players[current_player.get()]
+        if player.is_bot:
+            best_move = player.make_move(game_board)
+            if best_move:
+                draw_board(canvas, game_board)
+                update_wall_count_labels()
+                winner = game_board.check_winner()
+                if winner is not None:
+                    messagebox.showinfo("Game Over", f"Player {winner + 1} wins!")
+                    game_window.quit()
+                    game_window.destroy()
+                    return
+                switch_turn()
+
 
     draw_board(canvas, game_board)
     game_window.mainloop()
